@@ -66,8 +66,36 @@
     .tier-zone { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px; min-height: 80px; }
     .tier-zone.drag-hover { background: rgba(255, 255, 255, 0.15); }
 
-    .unassigned-section { margin-top: 15px; background: var(--surface); padding: 10px; border-radius: 10px; border: 1px dashed #3a3a3c; }
+    /* Rátapadó alsó sáv (Sticky container) */
+    .unassigned-section { 
+      position: sticky;
+      bottom: 10px;
+      z-index: 100;
+      margin-top: 15px; 
+      background: rgba(28, 28, 30, 0.95); 
+      backdrop-filter: blur(10px);
+      padding: 10px; 
+      border-radius: 12px; 
+      border: 1px solid #3a3a3c; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      box-sizing: border-box;
+    }
     .unassigned-title { font-size: 12px; font-weight: bold; color: #8e8e93; margin-bottom: 8px; text-transform: uppercase; }
+
+    /* Vízszintes csúszka / slider az alsó képeknek */
+    .unassigned-zone {
+      display: flex;
+      flex-wrap: nowrap !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+      gap: 10px;
+    }
+
+    .unassigned-zone .tier-img {
+      flex-shrink: 0; /* Megakadályozza, hogy összenyomódjanak a képek */
+    }
 
     .tier-img { 
       height: 75px; 
@@ -143,7 +171,7 @@
   <div id="tab-my" class="tab-content">
     <div id="my-board" class="tier-board"></div>
     <div class="unassigned-section">
-      <div class="unassigned-title">📦 Unassigned Items (Drag from here)</div>
+      <div class="unassigned-title">📦 Unassigned Items (Scroll horizontally)</div>
       <div class="tier-zone unassigned-zone" data-tier="0"></div>
     </div>
   </div>
@@ -212,36 +240,16 @@
 
     let roomData = {};
     let myData = [
-      { id: '1',  t: 0, p: 0 },
-      { id: '2',  t: 0, p: 0 },
-      { id: '3',  t: 0, p: 0 },
-      { id: '4',  t: 0, p: 0 },
-      { id: '5',  t: 0, p: 0 },
-      { id: '6',  t: 0, p: 0 },
-      { id: '7',  t: 0, p: 0 },
-      { id: '8',  t: 0, p: 0 },
-      { id: '9',  t: 0, p: 0 },
-      { id: '10', t: 0, p: 0 },
-      { id: '11', t: 0, p: 0 },
-      { id: '12', t: 0, p: 0 },
-      { id: '13', t: 0, p: 0 },
-      { id: '14', t: 0, p: 0 },
-      { id: '15', t: 0, p: 0 },
-      { id: '16', t: 0, p: 0 },
-      { id: '17', t: 0, p: 0 },
-      { id: '18', t: 0, p: 0 },
-      { id: '19', t: 0, p: 0 },
-      { id: '20', t: 0, p: 0 },
-      { id: '21', t: 0, p: 0 },
-      { id: '22', t: 0, p: 0 },
-      { id: '23', t: 0, p: 0 },
-      { id: '24', t: 0, p: 0 },
-      { id: '25', t: 0, p: 0 },
-      { id: '26', t: 0, p: 0 },
-      { id: '27', t: 0, p: 0 },
-      { id: '28', t: 0, p: 0 },
-      { id: '29', t: 0, p: 0 },
-      { id: '30', t: 0, p: 0 },
+      { id: '1',  t: 0, p: 0 }, { id: '2',  t: 0, p: 0 }, { id: '3',  t: 0, p: 0 },
+      { id: '4',  t: 0, p: 0 }, { id: '5',  t: 0, p: 0 }, { id: '6',  t: 0, p: 0 },
+      { id: '7',  t: 0, p: 0 }, { id: '8',  t: 0, p: 0 }, { id: '9',  t: 0, p: 0 },
+      { id: '10', t: 0, p: 0 }, { id: '11', t: 0, p: 0 }, { id: '12', t: 0, p: 0 },
+      { id: '13', t: 0, p: 0 }, { id: '14', t: 0, p: 0 }, { id: '15', t: 0, p: 0 },
+      { id: '16', t: 0, p: 0 }, { id: '17', t: 0, p: 0 }, { id: '18', t: 0, p: 0 },
+      { id: '19', t: 0, p: 0 }, { id: '20', t: 0, p: 0 }, { id: '21', t: 0, p: 0 },
+      { id: '22', t: 0, p: 0 }, { id: '23', t: 0, p: 0 }, { id: '24', t: 0, p: 0 },
+      { id: '25', t: 0, p: 0 }, { id: '26', t: 0, p: 0 }, { id: '27', t: 0, p: 0 },
+      { id: '28', t: 0, p: 0 }, { id: '29', t: 0, p: 0 }, { id: '30', t: 0, p: 0 },
       { id: '31', t: 0, p: 0 }
     ];
 
@@ -327,15 +335,12 @@
       const userName = document.getElementById('name-input').value.trim();
       if (!room) return;
 
-      // Helyi mentés a böngészőbe
       localStorage.setItem('monster_room', room);
       if (userName) localStorage.setItem('monster_name', userName);
 
-      // Firebase szinkronizáció
       db.ref('rooms/' + room).on('value', (snapshot) => {
         roomData = snapshot.val() || {};
         
-        // Ha van elmentett saját adatunk a Firebase-ben, betöltjük
         if (userName && roomData[userName]) {
           myData = roomData[userName];
           renderMyView();
@@ -464,7 +469,6 @@
       if (tabId === 'friends') renderFriendView();
     }
 
-    // Indításkor visszatöltjük az utolsó mentett Szobát és Nevet (ha volt)
     window.addEventListener('DOMContentLoaded', () => {
       const savedRoom = localStorage.getItem('monster_room');
       const savedName = localStorage.getItem('monster_name');
