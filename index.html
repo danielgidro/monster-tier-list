@@ -6,482 +6,81 @@
   <title>Monster Group TierApp</title>
   <style>
     :root {
-      --tier-5: #ff3b30; 
-      --tier-4: #ff9500; 
-      --tier-3: #ffcc00; 
-      --tier-2: #11a84e; 
-      --tier-1: #007aff; 
-      --bg-dark: #121212;
-      --surface: #1c1c1e; 
-      --accent: #30d158;
+      --tier-5: #ff3b30; --tier-4: #ff9500; --tier-3: #ffcc00; --tier-2: #11a84e; --tier-1: #007aff;
+      --bg-dark: #121212; --surface: #1c1c1e; --accent: #30d158;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-dark); color: #fff; margin: 0; padding: 15px;
-      display: flex; flex-direction: column; align-items: center;
-    }
-
-    h1 { margin-bottom: 2px; font-size: 22px; text-transform: uppercase; text-align: center; color: #fff; }
-    p.subtitle { color: #8e8e93; margin-top: 0; margin-bottom: 15px; font-size: 13px; text-align: center; }
-
-    .room-bar {
-      background: var(--surface); padding: 12px; border-radius: 10px; width: 100%;
-      max-width: 800px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px;
-      align-items: center; justify-content: space-between; border: 1px solid #3a3a3c;
-      box-sizing: border-box; color: #fff;
-    }
-    .room-bar label { color: #fff; font-size: 14px; }
-    .room-bar input {
-      background: #2c2c2e; color: #fff; border: 1px solid #444; padding: 8px;
-      border-radius: 6px; font-size: 14px; width: 110px;
-    }
-    .room-bar button {
-      background: var(--accent); color: #000; border: none; padding: 8px 14px;
-      border-radius: 6px; font-weight: bold; cursor: pointer;
-    }
-
-    .nav-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
-    .tab-btn {
-      background: #2c2c2e; color: #8e8e93; border: none; padding: 10px 14px;
-      border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px;
-    }
-    .tab-btn.active { background: var(--accent); color: #000; }
-
-    .tab-content { display: none; width: 100%; max-width: 800px; }
-    .tab-content.active { display: block; }
-
-    .tier-board { display: flex; flex-direction: column; gap: 6px; background: #000; padding: 6px; border-radius: 10px; }
-    .tier-row { display: flex; background: var(--surface); min-height: 95px; border-radius: 6px; overflow: hidden; }
+    body { font-family: -apple-system, sans-serif; background-color: var(--bg-dark); color: #fff; margin: 0; padding: 10px; }
+    
+    /* Tier Sorok: Itt a képek egymás alatt lesznek */
+    .tier-board { display: flex; flex-direction: column; gap: 4px; background: #000; padding: 4px; border-radius: 8px; }
+    .tier-row { display: flex; background: var(--surface); border-radius: 6px; overflow: hidden; min-height: 60px; }
+    
     .tier-badge {
-      width: 65px; display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 18px; color: #000; flex-shrink: 0;
+      width: 50px; display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 16px; color: #000; flex-shrink: 0;
     }
-    .badge-5 { background: var(--tier-5); }
-    .badge-4 { background: var(--tier-4); }
-    .badge-3 { background: var(--tier-3); }
-    .badge-2 { background: var(--tier-2); }
-    .badge-1 { background: var(--tier-1); }
-
-    .tier-zone { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px; min-height: 80px; }
-    .tier-zone.drag-hover { background: rgba(255, 255, 255, 0.15); }
-
-    /* Rátapadó alsó sáv (Sticky container) */
-    .unassigned-section { 
-      position: sticky;
-      bottom: 10px;
-      z-index: 100;
-      margin-top: 15px; 
-      background: rgba(28, 28, 30, 0.95); 
-      backdrop-filter: blur(10px);
-      padding: 10px; 
-      border-radius: 12px; 
-      border: 1px solid #3a3a3c; 
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-      box-sizing: border-box;
+    
+    /* A Zóna: Egymás alatt elrendezés */
+    .tier-zone { 
+      flex: 1; display: flex; flex-direction: column; /* EGYSÉG ALATTI ELRENDEZÉS */
+      padding: 5px; gap: 5px; min-height: 55px; 
     }
-    .unassigned-title { font-size: 12px; font-weight: bold; color: #8e8e93; margin-bottom: 8px; text-transform: uppercase; }
-
-    /* Vízszintes csúszka / slider az alsó képeknek */
-    .unassigned-zone {
-      display: flex;
-      flex-wrap: nowrap !important;
-      overflow-x: auto;
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 6px;
-      gap: 10px;
-    }
-
-    .unassigned-zone .tier-img {
-      flex-shrink: 0; /* Megakadályozza, hogy összenyomódjanak a képek */
-    }
+    
+    .tier-zone.drag-hover { background: rgba(255, 255, 255, 0.1); }
 
     .tier-img { 
-      height: 75px; 
-      width: auto; 
-      object-fit: contain; 
-      cursor: grab; 
-      user-select: none; 
-      border-radius: 6px; 
-
-      /* Mobil letöltési menü és kijelölés letiltása */
+      height: 50px; width: 50px; object-fit: contain; cursor: grab;
+      user-select: none; border-radius: 4px;
       -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
     }
-    .tier-img:active { cursor: grabbing; }
-    .tier-img.dragging { opacity: 0.3; }
 
-    .friend-picker {
-      display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;
+    /* Alsó csúszka: Vízszintes marad */
+    .unassigned-section { 
+      position: sticky; bottom: 0; background: #1c1c1e; padding: 10px;
+      border-top: 1px solid #333; z-index: 100;
     }
-    .friend-select-box {
-      background: #2c2c2e; color: #ffffff; padding: 12px 16px; border-radius: 8px;
-      font-size: 16px; font-weight: bold; border: 1px solid #444; width: 100%;
-      box-sizing: border-box; cursor: pointer; outline: none;
+    .unassigned-zone { 
+      display: flex; flex-direction: row; /* VÍZSZINTES marad */
+      overflow-x: auto; gap: 10px; padding-bottom: 5px;
     }
-    .friend-select-box option {
-      background-color: #2c2c2e;
-      color: #ffffff;
-    }
-    .no-friends-msg {
-      background: var(--surface); padding: 35px 20px; border-radius: 10px;
-      text-align: center; color: #8e8e93; font-size: 16px; font-weight: bold;
-      border: 1px dashed #3a3a3c;
-    }
+    .unassigned-zone .tier-img { flex-shrink: 0; }
   </style>
 
-  <!-- Mobile Drag & Drop Támogatás (Polyfill) -->
   <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.0/DragDropTouch.js"></script>
-
-  <!-- Firebase SDK-k -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-  <h1>Monster Group TierList</h1>
-  <p class="subtitle">Real-time Group Rating</p>
-
-  <div class="room-bar">
-    <div>
-      <label>Room: </label>
-      <input type="text" id="room-input" value="">
-    </div>
-    <div>
-      <label>Name: </label>
-      <input type="text" id="name-input" value="">
-    </div>
-    <button onclick="connectToRoom()">Join Room</button>
-  </div>
-
-  <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('group', this)">📊 Group Tier</button>
-    <button class="tab-btn" onclick="switchTab('my', this)">✏️ My Tier</button>
-    <button class="tab-btn" onclick="switchTab('friends', this)">👥 Friends</button>
-  </div>
-
-  <div id="tab-group" class="tab-content active">
-    <div id="group-board" class="tier-board"></div>
-  </div>
-
-  <div id="tab-my" class="tab-content">
-    <div id="my-board" class="tier-board"></div>
-    <div class="unassigned-section">
-      <div class="unassigned-title">📦 Unassigned Items (Scroll horizontally)</div>
-      <div class="tier-zone unassigned-zone" data-tier="0"></div>
-    </div>
-  </div>
-
-  <div id="tab-friends" class="tab-content">
-    <div id="friend-container">
-      <div class="friend-picker">
-        <label style="font-size: 13px; font-weight: bold; color: #8e8e93; text-transform: uppercase;">Select Friend:</label>
-        <select id="friend-select" class="friend-select-box" onchange="renderFriendView()"></select>
-      </div>
-      <div id="friend-board" class="tier-board"></div>
-    </div>
-    <div id="no-friends-msg" class="no-friends-msg" style="display: none;">
-      👥 No friends added yet in this room.
-    </div>
-  </div>
-
+  <!-- (A HTML szerkezet marad ugyanaz, a CSS/JS logikát cseréld ki az alábbira) -->
+  
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBm-OZUTOdc20Jx637WFLXCrQs_QnHViYA",
-      authDomain: "monster-tier-list.firebaseapp.com",
-      projectId: "monster-tier-list",
-      storageBucket: "monster-tier-list.firebasestorage.app",
-      messagingSenderId: "155876294578",
-      appId: "1:155876294578:web:3641c1bc9513b4bf16eeab",
-      measurementId: "G-3R00X2SMSM",
-      databaseURL: "https://monster-tier-list-default-rtdb.firebaseio.com"
-    };
+    // ... (Firebase és adatok maradnak) ...
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const products = [
-      { id: '1',  name: 'Aussie Lemonade',          img: 'Aussie Lemonade.png' },
-      { id: '2',  name: 'Bad Apple',                img: 'Bad Apple.png' },
-      { id: '3',  name: 'Energy Zero Sugar',        img: 'Energy Zero Sugar.png' },
-      { id: '4',  name: 'Energy',                   img: 'Energy.png' },
-      { id: '5',  name: 'Full Throttle',            img: 'Full Throttle.png' },
-      { id: '6',  name: 'Khaotic',                  img: 'Khaotic.png' },
-      { id: '7',  name: 'Lando Norris',             img: 'Lando Norris.png' },
-      { id: '8',  name: 'Mango Loco',               img: 'Mango Loco.png' },
-      { id: '9',  name: 'Monarch',                  img: 'Monarch.png' },
-      { id: '10', name: 'Nitro Cosmic Peach',       img: 'Nitro Cosmic Peach.png' },
-      { id: '11', name: 'Nitro Super Dry',          img: 'Nitro Super Dry.png' },
-      { id: '12', name: 'Pacific Punch',            img: 'Pacific Punch.png' },
-      { id: '13', name: 'Pipeline Punch',           img: 'Pipeline Punch.png' },
-      { id: '14', name: 'Rehab Lemonade Tea',       img: 'Rehab Lemonade Tea.png' },
-      { id: '15', name: 'Rehab Peach Tea',          img: 'Rehab Peach Tea.png' },
-      { id: '16', name: 'Rio Punch',                img: 'Rio Punch.png' },
-      { id: '17', name: 'Ultra Black',              img: 'Ultra Black.png' },
-      { id: '18', name: 'Ultra Fantasy Ruby Red',   img: 'Ultra Fantasy Ruby Red.png' },
-      { id: '19', name: 'Ultra Fiesta Mango',       img: 'Ultra Fiesta Mango.png' },
-      { id: '20', name: 'Ultra Golden Pineapple',   img: 'Ultra Golden Pineapple.png' },
-      { id: '21', name: 'Ultra Paradise',           img: 'Ultra Paradise.png' },
-      { id: '22', name: 'Ultra Peachy Keen',        img: 'Ultra Peachy Keen.png' },
-      { id: '23', name: 'Ultra Rosa',               img: 'Ultra Rosa.png' },
-      { id: '24', name: 'Ultra Strawberry Dreams',  img: 'Ultra Strawberry Dreams.png' },
-      { id: '25', name: 'Ultra Vice Guava',         img: 'Ultra Vice Guava.png' },
-      { id: '26', name: 'Ultra Violet',             img: 'Ultra Violet.png' },
-      { id: '27', name: 'Ultra Watermelon',         img: 'Ultra Watermelon.png' },
-      { id: '28', name: 'Ultra Zero',               img: 'Ultra Zero.png' },
-      { id: '29', name: 'Viking Berry',             img: 'Viking Berry.png' },
-      { id: '30', name: 'VR46 Doctor',              img: 'VR46 Doctor.png' },
-      { id: '31', name: 'VR46 Zero',                img: 'VR46 Zero.png' }
-    ];
-
-    let roomData = {};
-    let myData = [
-      { id: '1',  t: 0, p: 0 }, { id: '2',  t: 0, p: 0 }, { id: '3',  t: 0, p: 0 },
-      { id: '4',  t: 0, p: 0 }, { id: '5',  t: 0, p: 0 }, { id: '6',  t: 0, p: 0 },
-      { id: '7',  t: 0, p: 0 }, { id: '8',  t: 0, p: 0 }, { id: '9',  t: 0, p: 0 },
-      { id: '10', t: 0, p: 0 }, { id: '11', t: 0, p: 0 }, { id: '12', t: 0, p: 0 },
-      { id: '13', t: 0, p: 0 }, { id: '14', t: 0, p: 0 }, { id: '15', t: 0, p: 0 },
-      { id: '16', t: 0, p: 0 }, { id: '17', t: 0, p: 0 }, { id: '18', t: 0, p: 0 },
-      { id: '19', t: 0, p: 0 }, { id: '20', t: 0, p: 0 }, { id: '21', t: 0, p: 0 },
-      { id: '22', t: 0, p: 0 }, { id: '23', t: 0, p: 0 }, { id: '24', t: 0, p: 0 },
-      { id: '25', t: 0, p: 0 }, { id: '26', t: 0, p: 0 }, { id: '27', t: 0, p: 0 },
-      { id: '28', t: 0, p: 0 }, { id: '29', t: 0, p: 0 }, { id: '30', t: 0, p: 0 },
-      { id: '31', t: 0, p: 0 }
-    ];
-
-    const tierLevels = [
-      { level: 5, label: '5★', class: 'badge-5' }, { level: 4, label: '4★', class: 'badge-4' },
-      { level: 3, label: '3★', class: 'badge-3' }, { level: 2, label: '2★', class: 'badge-2' },
-      { level: 1, label: '1★', class: 'badge-1' }
-    ];
-
-    function buildBoard(containerId, isInteractive = false) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      tierLevels.forEach(tl => {
-        const row = document.createElement('div');
-        row.className = 'tier-row';
-        row.innerHTML = `<div class="tier-badge ${tl.class}">${tl.label}</div><div class="tier-zone" data-tier="${tl.level}"></div>`;
-        container.appendChild(row);
-      });
-      if (isInteractive) attachDragEvents(document.getElementById('tab-my'));
-    }
-
-    let draggedImg = null;
-    function attachDragEvents(container) {
-      const zones = container.querySelectorAll('.tier-zone');
-      zones.forEach(zone => {
-        zone.addEventListener('dragover', e => {
-          e.preventDefault();
-          zone.classList.add('drag-hover');
-          const afterElement = getDragAfterElement(zone, e.clientX);
-          if (afterElement == null) zone.appendChild(draggedImg);
-          else zone.insertBefore(draggedImg, afterElement);
-        });
-        zone.addEventListener('dragleave', () => zone.classList.remove('drag-hover'));
-        zone.addEventListener('drop', e => {
-          e.preventDefault();
-          zone.classList.remove('drag-hover');
-          updateMyDataFromDOM();
-          saveToFirebase();
-          renderMyView();
-        });
-      });
-    }
-
-    function getDragAfterElement(container, x) {
+    // A húzási logika frissítése a függőleges irányhoz:
+    function getDragAfterElement(container, y) {
+      // Függőlegesen keressük az elemet (clientY helyett)
       const elements = [...container.querySelectorAll('.tier-img:not(.dragging)')];
       return elements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
-        const offset = x - box.left - box.width / 2;
+        const offset = y - box.top - box.height / 2;
         if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
         else return closest;
       }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    function makeImgDraggable(img) {
-      img.draggable = true;
-      img.addEventListener('contextmenu', e => e.preventDefault());
-      img.addEventListener('dragstart', () => { draggedImg = img; img.classList.add('dragging'); });
-      img.addEventListener('dragend', () => { img.classList.remove('dragging'); draggedImg = null; });
-    }
-
-    function updateMyDataFromDOM() {
-      const updated = [];
-      const zones = document.querySelectorAll('#tab-my .tier-zone');
-      zones.forEach(zone => {
-        const tier = parseInt(zone.getAttribute('data-tier'));
-        const images = zone.querySelectorAll('.tier-img');
-        images.forEach((img, idx) => {
-          updated.push({ id: img.getAttribute('data-id'), t: tier, p: tier === 0 ? 0 : idx + 1 });
-        });
-      });
-      myData = updated;
-    }
-
-    function createImgElement(productId) {
-      const prod = products.find(p => p.id === productId);
-      const img = document.createElement('img');
-      img.src = prod.img; img.className = 'tier-img'; img.setAttribute('data-id', productId);
-      return img;
-    }
-
-    function connectToRoom() {
-      const room = document.getElementById('room-input').value.trim();
-      const userName = document.getElementById('name-input').value.trim();
-      if (!room) return;
-
-      localStorage.setItem('monster_room', room);
-      if (userName) localStorage.setItem('monster_name', userName);
-
-      db.ref('rooms/' + room).on('value', (snapshot) => {
-        roomData = snapshot.val() || {};
-        
-        if (userName && roomData[userName]) {
-          myData = roomData[userName];
-          renderMyView();
-        }
-
-        updateFriendDropdown();
-        renderGroupView();
-      });
-    }
-
-    function saveToFirebase() {
-      const room = document.getElementById('room-input').value.trim();
-      const userName = document.getElementById('name-input').value.trim();
-
-      if (!room || !userName) return;
-
-      db.ref(`rooms/${room}/${userName}`).set(myData);
-    }
-
-    function updateFriendDropdown() {
-      const select = document.getElementById('friend-select');
-      const friendContainer = document.getElementById('friend-container');
-      const noFriendsMsg = document.getElementById('no-friends-msg');
-      
-      const myName = document.getElementById('name-input').value.trim();
-      const friendNames = Object.keys(roomData).filter(name => name !== myName);
-
-      select.innerHTML = '';
-      if (friendNames.length === 0) {
-        friendContainer.style.display = 'none';
-        noFriendsMsg.style.display = 'block';
-      } else {
-        friendContainer.style.display = 'block';
-        noFriendsMsg.style.display = 'none';
-        friendNames.forEach(name => {
-          const opt = document.createElement('option');
-          opt.value = name; opt.innerText = name;
-          select.appendChild(opt);
-        });
-        renderFriendView();
-      }
-    }
-
-    function renderMyView() {
-      buildBoard('my-board', true);
-      const unassignedZone = document.querySelector('#tab-my .unassigned-zone');
-      unassignedZone.innerHTML = '';
-
-      const unassignedItems = myData.filter(item => item.t === 0)
-        .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
-
-      unassignedItems.forEach(item => {
-        const img = createImgElement(item.id);
-        makeImgDraggable(img);
-        unassignedZone.appendChild(img);
-      });
-
-      const assignedItems = myData.filter(item => item.t > 0);
-      assignedItems.forEach(item => {
-        const img = createImgElement(item.id);
-        makeImgDraggable(img);
-        const zone = document.querySelector(`#my-board .tier-zone[data-tier="${item.t}"]`);
-        if (zone) zone.appendChild(img);
-      });
-    }
-
-    function renderFriendView() {
-      buildBoard('friend-board', false);
-      const name = document.getElementById('friend-select').value;
-      if (!name || !roomData[name]) return;
-
-      roomData[name].forEach(item => {
-        if (item.t > 0) {
-          const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
-          if (zone) zone.appendChild(createImgElement(item.id));
-        }
-      });
-    }
-
-    function renderGroupView() {
-      buildBoard('group-board', false);
-      const allSubmissions = Object.values(roomData);
-      if (allSubmissions.length === 0) return;
-
-      const stats = {};
-      products.forEach(p => stats[p.id] = { id: p.id, starSum: 0, posSum: 0, count: 0 });
-
-      allSubmissions.forEach(sub => {
-        sub.forEach(item => {
-          if (item.t > 0) {
-            stats[item.id].starSum += item.t;
-            stats[item.id].posSum += item.p;
-            stats[item.id].count += 1;
-          }
-        });
-      });
-
-      const processed = Object.values(stats).filter(s => s.count > 0).map(s => ({
-        id: s.id, avgStars: s.starSum / s.count, posPoints: s.posSum
-      }));
-
-      const groupTiers = { 5:[], 4:[], 3:[], 2:[], 1:[] };
-      processed.forEach(i => {
-        if (i.avgStars >= 4.5) groupTiers[5].push(i);
-        else if (i.avgStars >= 3.5) groupTiers[4].push(i);
-        else if (i.avgStars >= 2.5) groupTiers[3].push(i);
-        else if (i.avgStars >= 1.5) groupTiers[2].push(i);
-        else groupTiers[1].push(i);
-      });
-
-      Object.keys(groupTiers).forEach(tLevel => {
-        groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
-        const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
-        groupTiers[tLevel].forEach(item => zone.appendChild(createImgElement(item.id)));
-      });
-    }
-
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(`tab-${tabId}`).classList.add('active');
-
-      if (tabId === 'group') renderGroupView();
-      if (tabId === 'my') renderMyView();
-      if (tabId === 'friends') renderFriendView();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedRoom = localStorage.getItem('monster_room');
-      const savedName = localStorage.getItem('monster_name');
-      if (savedRoom) document.getElementById('room-input').value = savedRoom;
-      if (savedName) document.getElementById('name-input').value = savedName;
-      
-      renderMyView();
-      renderGroupView();
-
-      if (savedRoom) {
-        connectToRoom();
-      }
+    // A drop eseményben is cseréld le a clientX-et clientY-ra:
+    // ... (Az attachDragEvents függvényen belül) ...
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      zone.classList.add('drag-hover');
+      const afterElement = getDragAfterElement(zone, e.clientY); // Y koordináta
+      if (afterElement == null) zone.appendChild(draggedImg);
+      else zone.insertBefore(draggedImg, afterElement);
     });
+
+    // ... (A többi rész marad az előző verzióból) ...
   </script>
 </body>
 </html>
