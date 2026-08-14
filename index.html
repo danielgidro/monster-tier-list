@@ -297,7 +297,6 @@
 
     function makeImgDraggable(img) {
       img.draggable = true;
-      // Kontextusmenü (hosszú nyomásos letöltés/megosztás) tiltása
       img.addEventListener('contextmenu', e => e.preventDefault());
       img.addEventListener('dragstart', () => { draggedImg = img; img.classList.add('dragging'); });
       img.addEventListener('dragend', () => { img.classList.remove('dragging'); draggedImg = null; });
@@ -324,19 +323,32 @@
     }
 
     function connectToRoom() {
-      const room = document.getElementById('room-input').value;
+      const room = document.getElementById('room-input').value.trim();
+      const userName = document.getElementById('name-input').value.trim();
       if (!room) return;
 
+      // Helyi mentés a böngészőbe
+      localStorage.setItem('monster_room', room);
+      if (userName) localStorage.setItem('monster_name', userName);
+
+      // Firebase szinkronizáció
       db.ref('rooms/' + room).on('value', (snapshot) => {
         roomData = snapshot.val() || {};
+        
+        // Ha van elmentett saját adatunk a Firebase-ben, betöltjük
+        if (userName && roomData[userName]) {
+          myData = roomData[userName];
+          renderMyView();
+        }
+
         updateFriendDropdown();
         renderGroupView();
       });
     }
 
     function saveToFirebase() {
-      const room = document.getElementById('room-input').value;
-      const userName = document.getElementById('name-input').value;
+      const room = document.getElementById('room-input').value.trim();
+      const userName = document.getElementById('name-input').value.trim();
 
       if (!room || !userName) return;
 
@@ -452,9 +464,20 @@
       if (tabId === 'friends') renderFriendView();
     }
 
-    renderMyView();
-    renderGroupView();
-    connectToRoom();
+    // Indításkor visszatöltjük az utolsó mentett Szobát és Nevet (ha volt)
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedRoom = localStorage.getItem('monster_room');
+      const savedName = localStorage.getItem('monster_name');
+      if (savedRoom) document.getElementById('room-input').value = savedRoom;
+      if (savedName) document.getElementById('name-input').value = savedName;
+      
+      renderMyView();
+      renderGroupView();
+
+      if (savedRoom) {
+        connectToRoom();
+      }
+    });
   </script>
 </body>
 </html>
