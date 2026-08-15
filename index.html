@@ -6,8 +6,15 @@
   <title>Monster Group TierApp</title>
   <style>
     :root {
-      --tier-5: #ff3b30; --tier-4: #ff9500; --tier-3: #ffcc00; --tier-2: #11a84e; --tier-1: #007aff; 
-      --bg-dark: #121212; --surface: #1c1c1e; --accent: #30d158; --danger: #ff453a;
+      --tier-5: #ff3b30; 
+      --tier-4: #ff9500; 
+      --tier-3: #ffcc00; 
+      --tier-2: #11a84e; 
+      --tier-1: #007aff; 
+      --bg-dark: #121212;
+      --surface: #1c1c1e; 
+      --accent: #30d158;
+      --danger: #ff453a;
     }
 
     body {
@@ -35,7 +42,9 @@
       background: var(--accent); color: #000; border: none; padding: 8px 14px;
       border-radius: 6px; font-weight: bold; cursor: pointer;
     }
-    .room-bar button.leave-btn { background: var(--danger); color: #fff; }
+    .room-bar button.leave-btn {
+      background: var(--danger); color: #fff;
+    }
 
     .nav-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
     .tab-btn {
@@ -48,10 +57,10 @@
     .tab-content.active { display: block; }
 
     .tier-board { display: flex; flex-direction: column; gap: 6px; background: #000; padding: 6px; border-radius: 10px; width: 100%; box-sizing: border-box; }
-    .tier-row { display: flex; background: var(--surface); min-height: 95px; border-radius: 6px; overflow: hidden; align-items: center; }
+    .tier-row { display: flex; background: var(--surface); min-height: 75px; border-radius: 6px; overflow: hidden; }
     .tier-badge {
       width: 65px; display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 18px; color: #000; height: 100%; flex-shrink: 0;
+      font-weight: 800; font-size: 18px; color: #000; flex-shrink: 0;
     }
     .badge-5 { background: var(--tier-5); }
     .badge-4 { background: var(--tier-4); }
@@ -60,9 +69,8 @@
     .badge-1 { background: var(--tier-1); }
 
     .tier-zone { 
-      flex: 1; display: flex; flex-direction: row; 
-      align-items: center; gap: 8px; padding: 8px; min-height: 80px;
-      overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
+      flex: 1; display: flex; flex-direction: column; 
+      align-items: flex-start; gap: 6px; padding: 8px; min-height: 60px; 
     }
     .tier-zone.drag-hover { background: rgba(255, 255, 255, 0.15); }
 
@@ -81,11 +89,40 @@
     }
     .unassigned-title { font-size: 12px; font-weight: bold; color: #8e8e93; margin-bottom: 6px; text-transform: uppercase; }
 
-    .tier-img { 
-      height: 75px; width: 75px; object-fit: contain; cursor: grab; user-select: none; border-radius: 6px; flex-shrink: 0;
-      -webkit-touch-callout: none; -webkit-user-select: none;
+    .unassigned-zone {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      -webkit-overflow-scrolling: touch;
+      gap: 10px;
+      padding-bottom: 5px;
+      width: 100%;
     }
+
+    .unassigned-zone::-webkit-scrollbar { height: 6px; }
+    .unassigned-zone::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+
+    .tier-img { 
+      height: 65px; width: 65px; object-fit: contain; cursor: grab; user-select: none; border-radius: 6px; flex-shrink: 0;
+      -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none;
+    }
+    .tier-img:active { cursor: grabbing; }
     .tier-img.dragging { opacity: 0.3; }
+
+    .friend-picker { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+    .friend-select-box {
+      background: #2c2c2e; color: #ffffff; padding: 12px 16px; border-radius: 8px;
+      font-size: 16px; font-weight: bold; border: 1px solid #444; width: 100%;
+      box-sizing: border-box; cursor: pointer; outline: none;
+    }
+    .friend-select-box option { background-color: #2c2c2e; color: #ffffff; }
+    .no-friends-msg {
+      background: var(--surface); padding: 35px 20px; border-radius: 10px;
+      text-align: center; color: #8e8e93; font-size: 16px; font-weight: bold;
+      border: 1px dashed #3a3a3c;
+    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.0/DragDropTouch.js"></script>
@@ -98,8 +135,14 @@
   <p class="subtitle">Real-time Group Rating</p>
 
   <div class="room-bar">
-    <div><input type="text" id="room-input" placeholder="Room"></div>
-    <div><input type="text" id="name-input" placeholder="Name"></div>
+    <div>
+      <label>Room: </label>
+      <input type="text" id="room-input" value="">
+    </div>
+    <div>
+      <label>Name: </label>
+      <input type="text" id="name-input" value="">
+    </div>
     <div style="display: flex; gap: 6px;">
       <button onclick="connectToRoom()">Join</button>
       <button class="leave-btn" onclick="leaveRoom()">Leave</button>
@@ -107,8 +150,9 @@
   </div>
 
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('group', this)">📊 Group</button>
+    <button class="tab-btn active" onclick="switchTab('group', this)">📊 Group Tier</button>
     <button class="tab-btn" onclick="switchTab('my', this)">✏️ My Tier</button>
+    <button class="tab-btn" onclick="switchTab('friends', this)">👥 Friends</button>
   </div>
 
   <div id="tab-group" class="tab-content active">
@@ -119,9 +163,22 @@
     <div id="my-board" class="tier-board"></div>
   </div>
 
-  <div class="unassigned-section" id="unassigned-wrapper">
-    <div class="unassigned-title">📦 Unassigned</div>
-    <div class="tier-zone" id="unassigned-zone" data-tier="0"></div>
+  <div class="unassigned-section">
+    <div class="unassigned-title">📦 Unassigned Items (Húzd oldalra ujjal)</div>
+    <div class="tier-zone unassigned-zone" data-tier="0"></div>
+  </div>
+
+  <div id="tab-friends" class="tab-content">
+    <div id="friend-container">
+      <div class="friend-picker">
+        <label style="font-size: 13px; font-weight: bold; color: #8e8e93; text-transform: uppercase;">Select Friend:</label>
+        <select id="friend-select" class="friend-select-box" onchange="renderFriendView()"></select>
+      </div>
+      <div id="friend-board" class="tier-board"></div>
+    </div>
+    <div id="no-friends-msg" class="no-friends-msg" style="display: none;">
+      👥 No friends added yet in this room.
+    </div>
   </div>
 
   <script>
@@ -132,116 +189,359 @@
       storageBucket: "monster-tier-list.firebasestorage.app",
       messagingSenderId: "155876294578",
       appId: "1:155876294578:web:3641c1bc9513b4bf16eeab",
+      measurementId: "G-3R00X2SMSM",
       databaseURL: "https://monster-tier-list-default-rtdb.firebaseio.com"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const products = Array.from({length:31}, (_,i) => ({id: String(i+1), img: `${i+1}.png`}));
-    let myData = products.map(p => ({id: p.id, t: 0, p: 0}));
-    let roomData = {};
-    let dbRef = null;
+    const products = [
+      { id: '1',  name: 'Aussie Lemonade',          img: 'Aussie Lemonade.png' },
+      { id: '2',  name: 'Bad Apple',                img: 'Bad Apple.png' },
+      { id: '3',  name: 'Energy Zero Sugar',        img: 'Energy Zero Sugar.png' },
+      { id: '4',  name: 'Energy',                   img: 'Energy.png' },
+      { id: '5',  name: 'Full Throttle',            img: 'Full Throttle.png' },
+      { id: '6',  name: 'Khaotic',                  img: 'Khaotic.png' },
+      { id: '7',  name: 'Lando Norris',             img: 'Lando Norris.png' },
+      { id: '8',  name: 'Mango Loco',               img: 'Mango Loco.png' },
+      { id: '9',  name: 'Monarch',                  img: 'Monarch.png' },
+      { id: '10', name: 'Nitro Cosmic Peach',       img: 'Nitro Cosmic Peach.png' },
+      { id: '11', name: 'Nitro Super Dry',          img: 'Nitro Super Dry.png' },
+      { id: '12', name: 'Pacific Punch',            img: 'Pacific Punch.png' },
+      { id: '13', name: 'Pipeline Punch',           img: 'Pipeline Punch.png' },
+      { id: '14', name: 'Rehab Lemonade Tea',       img: 'Rehab Lemonade Tea.png' },
+      { id: '15', name: 'Rehab Peach Tea',          img: 'Rehab Peach Tea.png' },
+      { id: '16', name: 'Rio Punch',                img: 'Rio Punch.png' },
+      { id: '17', name: 'Ultra Black',              img: 'Ultra Black.png' },
+      { id: '18', name: 'Ultra Fantasy Ruby Red',   img: 'Ultra Fantasy Ruby Red.png' },
+      { id: '19', name: 'Ultra Fiesta Mango',       img: 'Ultra Fiesta Mango.png' },
+      { id: '20', name: 'Ultra Golden Pineapple',   img: 'Ultra Golden Pineapple.png' },
+      { id: '21', name: 'Ultra Paradise',           img: 'Ultra Paradise.png' },
+      { id: '22', name: 'Ultra Peachy Keen',        img: 'Ultra Peachy Keen.png' },
+      { id: '23', name: 'Ultra Rosa',               img: 'Ultra Rosa.png' },
+      { id: '24', name: 'Ultra Strawberry Dreams',  img: 'Ultra Strawberry Dreams.png' },
+      { id: '25', name: 'Ultra Vice Guava',         img: 'Ultra Vice Guava.png' },
+      { id: '26', name: 'Ultra Violet',             img: 'Ultra Violet.png' },
+      { id: '27', name: 'Ultra Watermelon',         img: 'Ultra Watermelon.png' },
+      { id: '28', name: 'Ultra Zero',               img: 'Ultra Zero.png' },
+      { id: '29', name: 'Viking Berry',             img: 'Viking Berry.png' },
+      { id: '30', name: 'VR46 Doctor',              img: 'VR46 Doctor.png' },
+      { id: '31', name: 'VR46 Zero',                img: 'VR46 Zero.png' }
+    ];
 
-    function buildBoard(id, interactive) {
-      const container = document.getElementById(id);
+    let roomData = {};
+    let currentConnectionRef = null; // Aktuális Firebase figyelő tárolása a leiratkozáshoz
+    let myData = [];
+    
+    // Alapértelmezett adatok betöltése (minden elem unassigned 0-s tierben)
+    function resetMyDataToDefault() {
+      myData = products.map(p => ({ id: p.id, t: 0, p: 0 }));
+    }
+    resetMyDataToDefault();
+
+    const tierLevels = [
+      { level: 5, label: '5★', class: 'badge-5' }, { level: 4, label: '4★', class: 'badge-4' },
+      { level: 3, label: '3★', class: 'badge-3' }, { level: 2, label: '2★', class: 'badge-2' },
+      { level: 1, label: '1★', class: 'badge-1' }
+    ];
+
+    function buildBoard(containerId, isInteractive = false) {
+      const container = document.getElementById(containerId);
       container.innerHTML = '';
-      [5,4,3,2,1].forEach(lvl => {
+      tierLevels.forEach(tl => {
         const row = document.createElement('div');
         row.className = 'tier-row';
-        row.innerHTML = `<div class="tier-badge badge-${lvl}">${lvl}★</div><div class="tier-zone" data-tier="${lvl}"></div>`;
+        row.innerHTML = `<div class="tier-badge ${tl.class}">${tl.label}</div><div class="tier-zone" data-tier="${tl.level}"></div>`;
         container.appendChild(row);
       });
-      if (interactive) attachDragEvents();
+      if (isInteractive) attachDragEvents(document.getElementById('tab-my'));
     }
 
-    function attachDragEvents() {
-      document.querySelectorAll('.tier-zone').forEach(zone => {
+    let draggedImg = null;
+    function attachDragEvents(container) {
+      const zones = container.querySelectorAll('.tier-zone');
+      const unassignedZone = document.querySelector('.unassigned-zone');
+      const allZones = [...zones, unassignedZone];
+
+      allZones.forEach(zone => {
         zone.addEventListener('dragover', e => {
           e.preventDefault();
-          const dragging = document.querySelector('.dragging');
-          const after = getAfterElement(zone, e.clientX);
-          after ? zone.insertBefore(dragging, after) : zone.appendChild(dragging);
+          zone.classList.add('drag-hover');
+          if (zone.classList.contains('unassigned-zone')) {
+            const afterElement = getDragAfterElementHorizontal(zone, e.clientX);
+            if (afterElement == null) zone.appendChild(draggedImg);
+            else zone.insertBefore(draggedImg, afterElement);
+          } else {
+            const afterElement = getDragAfterElementVertical(zone, e.clientY);
+            if (afterElement == null) zone.appendChild(draggedImg);
+            else zone.insertBefore(draggedImg, afterElement);
+          }
         });
+        zone.addEventListener('dragleave', () => zone.classList.remove('drag-hover'));
         zone.addEventListener('drop', e => {
-          updateMyData();
-          save();
-          render();
+          e.preventDefault();
+          zone.classList.remove('drag-hover');
+          updateMyDataFromDOM();
+          saveToFirebase();
+          renderMyView();
         });
       });
     }
 
-    function getAfterElement(zone, x) {
-      const els = [...zone.querySelectorAll('.tier-img:not(.dragging)')];
-      return els.reduce((closest, child) => {
+    function getDragAfterElementVertical(container, y) {
+      const elements = [...container.querySelectorAll('.tier-img:not(.dragging)')];
+      return elements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
-        const offset = x - box.left - box.width / 2;
-        return (offset < 0 && offset > closest.offset) ? {offset, element: child} : closest;
-      }, {offset: Number.NEGATIVE_INFINITY}).element;
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
+        else return closest;
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    function updateMyData() {
+    function getDragAfterElementHorizontal(container, x) {
+      const elements = [...container.querySelectorAll('.tier-img:not(.dragging)')];
+      return elements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
+        else return closest;
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function makeImgDraggable(img) {
+      img.draggable = true;
+      img.addEventListener('contextmenu', e => e.preventDefault());
+      img.addEventListener('dragstart', () => { draggedImg = img; img.classList.add('dragging'); });
+      img.addEventListener('dragend', () => { img.classList.remove('dragging'); draggedImg = null; });
+    }
+
+    function updateMyDataFromDOM() {
       const updated = [];
-      document.querySelectorAll('.tier-zone').forEach(zone => {
-        const t = parseInt(zone.getAttribute('data-tier'));
-        zone.querySelectorAll('.tier-img').forEach((img, i) => {
-          updated.push({id: img.dataset.id, t: t, p: i});
+      const zones = document.querySelectorAll('#tab-my .tier-row .tier-zone, .unassigned-zone');
+      zones.forEach(zone => {
+        const tier = parseInt(zone.getAttribute('data-tier'));
+        const images = zone.querySelectorAll('.tier-img');
+        images.forEach((img, idx) => {
+          updated.push({ id: img.getAttribute('data-id'), t: tier, p: tier === 0 ? 0 : idx + 1 });
         });
       });
       myData = updated;
     }
 
-    function render() {
-      document.querySelectorAll('.tier-zone').forEach(z => z.innerHTML = '');
-      myData.forEach(item => {
-        const img = document.createElement('img');
-        img.src = item.id + '.png';
-        img.className = 'tier-img';
-        img.dataset.id = item.id;
-        img.draggable = true;
-        img.ondragstart = () => img.classList.add('dragging');
-        img.ondragend = () => img.classList.remove('dragging');
-        const zone = document.querySelector(`.tier-zone[data-tier="${item.t}"]`);
-        if (zone) zone.appendChild(img);
-      });
+    function createImgElement(productId) {
+      const prod = products.find(p => p.id === productId);
+      const img = document.createElement('img');
+      img.src = prod.img; img.className = 'tier-img'; img.setAttribute('data-id', productId);
+      return img;
     }
 
     function connectToRoom() {
       const room = document.getElementById('room-input').value.trim();
-      const name = document.getElementById('name-input').value.trim();
-      if (!room || !name) return;
-      if (dbRef) dbRef.off();
-      dbRef = db.ref('rooms/' + room);
-      dbRef.on('value', s => { 
-        roomData = s.val() || {}; 
-        if(roomData[name]) myData = roomData[name]; 
-        render(); 
+      const userName = document.getElementById('name-input').value.trim();
+      if (!room) return;
+
+      localStorage.setItem('monster_room', room);
+      if (userName) localStorage.setItem('monster_name', userName);
+
+      if (currentConnectionRef) {
+        currentConnectionRef.off(); // Előző figyelés lekapcsolása
+      }
+
+      currentConnectionRef = db.ref('rooms/' + room);
+      currentConnectionRef.on('value', (snapshot) => {
+        roomData = snapshot.val() || {};
+        
+        if (userName && roomData[userName]) {
+          myData = roomData[userName];
+          renderMyView();
+        }
+
+        updateFriendDropdown();
+        renderGroupView();
       });
     }
 
     function leaveRoom() {
-      if (dbRef) dbRef.off();
-      myData = products.map(p => ({id: p.id, t: 0, p: 0}));
-      render();
+      if (currentConnectionRef) {
+        currentConnectionRef.off();
+        currentConnectionRef = null;
+      }
+      
+      localStorage.removeItem('monster_room');
+      localStorage.removeItem('monster_name');
+      
+      document.getElementById('room-input').value = '';
+      document.getElementById('name-input').value = '';
+      
+      roomData = {};
+      resetMyDataToDefault();
+      
+      renderMyView();
+      renderGroupView();
+      updateFriendDropdown();
+      
+      switchTab('my', document.querySelector('.nav-tabs button:nth-child(2)'));
     }
 
-    function save() {
+    function saveToFirebase() {
       const room = document.getElementById('room-input').value.trim();
-      const name = document.getElementById('name-input').value.trim();
-      if (room && name) db.ref(`rooms/${room}/${name}`).set(myData);
+      const userName = document.getElementById('name-input').value.trim();
+      if (!room || !userName) return;
+
+      db.ref(`rooms/${room}/${userName}`).set(myData);
     }
 
-    function switchTab(id, btn) {
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    function updateFriendDropdown() {
+      const select = document.getElementById('friend-select');
+      const friendContainer = document.getElementById('friend-container');
+      const noFriendsMsg = document.getElementById('no-friends-msg');
+      
+      const myName = document.getElementById('name-input').value.trim();
+      const friendNames = Object.keys(roomData).filter(name => name !== myName);
+
+      select.innerHTML = '';
+      if (friendNames.length === 0) {
+        friendContainer.style.display = 'none';
+        noFriendsMsg.style.display = 'block';
+      } else {
+        friendContainer.style.display = 'block';
+        noFriendsMsg.style.display = 'none';
+        friendNames.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name; opt.innerText = name;
+          select.appendChild(opt);
+        });
+        renderFriendView();
+      }
+    }
+
+    function renderMyView() {
+      buildBoard('my-board', true);
+      const unassignedZone = document.querySelector('.unassigned-zone');
+      unassignedZone.innerHTML = '';
+
+      attachDragEventsToUnassigned();
+
+      const unassignedItems = myData.filter(item => item.t === 0)
+        .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
+
+      unassignedItems.forEach(item => {
+        const img = createImgElement(item.id);
+        makeImgDraggable(img);
+        unassignedZone.appendChild(img);
+      });
+
+      const assignedItems = myData.filter(item => item.t > 0);
+      assignedItems.forEach(item => {
+        const img = createImgElement(item.id);
+        makeImgDraggable(img);
+        const zone = document.querySelector(`#my-board .tier-zone[data-tier="${item.t}"]`);
+        if (zone) zone.appendChild(img);
+      });
+    }
+
+    function attachDragEventsToUnassigned() {
+      const unassignedZone = document.querySelector('.unassigned-zone');
+      unassignedZone.addEventListener('dragover', e => {
+        e.preventDefault();
+        unassignedZone.classList.add('drag-hover');
+        const afterElement = getDragAfterElementHorizontal(unassignedZone, e.clientX);
+        if (afterElement == null) unassignedZone.appendChild(draggedImg);
+        else unassignedZone.insertBefore(draggedImg, afterElement);
+      });
+      unassignedZone.addEventListener('dragleave', () => unassignedZone.classList.remove('drag-hover'));
+      unassignedZone.addEventListener('drop', e => {
+        e.preventDefault();
+        unassignedZone.classList.remove('drag-hover');
+        updateMyDataFromDOM();
+        saveToFirebase();
+        renderMyView();
+      });
+    }
+
+    function renderFriendView() {
+      buildBoard('friend-board', false);
+      const name = document.getElementById('friend-select').value;
+      if (!name || !roomData[name]) return;
+
+      roomData[name].forEach(item => {
+        if (item.t > 0) {
+          const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
+          if (zone) zone.appendChild(createImgElement(item.id));
+        }
+      });
+    }
+
+    function renderGroupView() {
+      buildBoard('group-board', false);
+      const allSubmissions = Object.values(roomData);
+      if (allSubmissions.length === 0) return;
+
+      const stats = {};
+      products.forEach(p => stats[p.id] = { id: p.id, starSum: 0, posSum: 0, count: 0 });
+
+      allSubmissions.forEach(sub => {
+        sub.forEach(item => {
+          if (item.t > 0) {
+            stats[item.id].starSum += item.t;
+            stats[item.id].posSum += item.p;
+            stats[item.id].count += 1;
+          }
+        });
+      });
+
+      const processed = Object.values(stats).filter(s => s.count > 0).map(s => ({
+        id: s.id, avgStars: s.starSum / s.count, posPoints: s.posSum
+      }));
+
+      const groupTiers = { 5:[], 4:[], 3:[], 2:[], 1:[] };
+      processed.forEach(i => {
+        if (i.avgStars >= 4.5) groupTiers[5].push(i);
+        else if (i.avgStars >= 3.5) groupTiers[4].push(i);
+        else if (i.avgStars >= 2.5) groupTiers[3].push(i);
+        else if (i.avgStars >= 1.5) groupTiers[2].push(i);
+        else groupTiers[1].push(i);
+      });
+
+      Object.keys(groupTiers).forEach(tLevel => {
+        groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
+        const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
+        groupTiers[tLevel].forEach(item => zone.appendChild(createImgElement(item.id)));
+      });
+    }
+
+    function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-' + id).classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
-      document.getElementById('unassigned-wrapper').style.display = id === 'my' ? 'block' : 'none';
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+
+      const unassignedSection = document.querySelector('.unassigned-section');
+      if (tabId === 'my') {
+        unassignedSection.style.display = 'block';
+      } else {
+        unassignedSection.style.display = 'none';
+      }
+
+      if (tabId === 'group') renderGroupView();
+      if (tabId === 'my') renderMyView();
+      if (tabId === 'friends') renderFriendView();
     }
 
-    buildBoard('my-board', true);
-    buildBoard('group-board', false);
-    render();
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedRoom = localStorage.getItem('monster_room');
+      const savedName = localStorage.getItem('monster_name');
+      if (savedRoom) document.getElementById('room-input').value = savedRoom;
+      if (savedName) document.getElementById('name-input').value = savedName;
+      
+      renderMyView();
+      renderGroupView();
+
+      if (savedRoom) {
+        connectToRoom();
+      }
+    });
   </script>
 </body>
 </html>
