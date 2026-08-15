@@ -573,12 +573,14 @@
         groupTiers[tLevel].forEach(item => zone.appendChild(createImgElement(item.id, false)));
       });
 
-      const top5 = processed
-        .sort((a, b) => b.avgStars - a.avgStars || a.posPoints - b.posPoints)
-        .slice(0, 5);
+      const sortedGroupItems = [];
+      [5, 4, 3, 2, 1].forEach(tLevel => {
+        groupTiers[tLevel].forEach(item => sortedGroupItems.push(item));
+      });
+
+      const top5 = sortedGroupItems.slice(0, 5);
 
       if (top5.length > 0) {
-        // Eredeti 3D dobogó elrendezés (balról jobbra csökkenő), de mobilon is jól kezelhetően görgethetővé téve
         const podiumOrderIndices = [];
         if (top5.length >= 1) podiumOrderIndices.push(0);
         if (top5.length >= 2) podiumOrderIndices.push(1);
