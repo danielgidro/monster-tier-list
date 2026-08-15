@@ -73,10 +73,11 @@
       flex: 1; display: flex; flex-direction: row; 
       align-items: center; gap: 6px; padding: 8px; min-height: 60px; 
       overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
+      cursor: pointer;
     }
     .tier-zone::-webkit-scrollbar { height: 6px; }
     .tier-zone::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-    .tier-zone.drag-hover { background: rgba(255, 255, 255, 0.15); }
+    .tier-zone.selected-zone { background: rgba(48, 209, 88, 0.15); border: 2px dashed var(--accent); }
 
     .unassigned-section { 
       position: fixed;
@@ -109,17 +110,14 @@
     .unassigned-zone::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
 
     .tier-img { 
-      height: 65px; width: 65px; object-fit: contain; cursor: grab; border-radius: 6px; flex-shrink: 0;
-      touch-action: pan-x pan-y;
-      transition: transform 0.2s, box-shadow 0.2s;
+      height: 65px; width: 65px; object-fit: contain; cursor: pointer; border-radius: 6px; flex-shrink: 0;
+      transition: transform 0.15s, box-shadow 0.15s, border 0.15s;
+      border: 2px solid transparent;
     }
-    .tier-img.floating {
-      position: fixed;
-      z-index: 9999;
-      pointer-events: none;
-      opacity: 0.85;
-      transform: scale(1.15);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+    .tier-img.selected {
+      border: 2px solid var(--accent);
+      transform: scale(1.1);
+      box-shadow: 0 0 12px rgba(48, 209, 88, 0.6);
     }
 
     .friend-picker { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
@@ -174,8 +172,8 @@
   </div>
 
   <div class="unassigned-section">
-    <div class="unassigned-title">📦 Unassigned Items (Tartsd nyomva 0.5 mp-ig a húzáshoz)</div>
-    <div class="tier-zone unassigned-zone" data-tier="0"></div>
+    <div class="unassigned-title">📦 Kattints egy képre, majd kattints a cél sávra!</div>
+    <div class="tier-zone unassigned-zone" data-tier="0" onclick="handleZoneClick(event, this)"></div>
   </div>
 
   <div id="tab-friends" class="tab-content">
@@ -243,6 +241,7 @@
     let roomData = {};
     let currentConnectionRef = null; 
     let myData = [];
+    let selectedProductId = null; // A kiválasztott termék ID-je
     
     function resetMyDataToDefault() {
       myData = products.map(p => ({ id: p.id, t: 0, p: 0 }));
@@ -261,169 +260,88 @@
       tierLevels.forEach(tl => {
         const row = document.createElement('div');
         row.className = 'tier-row';
-        row.innerHTML = `<div class="tier-badge ${tl.class}">${tl.label}</div><div class="tier-zone" data-tier="${tl.level}"></div>`;
+        
+        let zoneAttrs = `class="tier-zone" data-tier="${tl.level}"`;
+        if (isInteractive) {
+          zoneAttrs += ` onclick="handleZoneClick(event, this)"`;
+        }
+
+        row.innerHTML = `<div class="tier-badge ${tl.class}">${tl.label}</div><div ${zoneAttrs}></div>`;
         container.appendChild(row);
       });
-      if (isInteractive) initCustomDragAndDrop();
     }
 
-    // --- SAJÁT UNIVERZÁLIS HÚZÁS-EJTÉS (LONG-PRESS IDŐZÍTŐVEL) ---
-    function initCustomDragAndDrop() {
-      const tabMy = document.getElementById('tab-my');
-      const unassignedSec = document.querySelector('.unassigned-section');
-      const interactiveZones = [...tabMy.querySelectorAll('.tier-zone'), unassignedSec.querySelector('.unassigned-zone')];
-
-      tabMy.querySelectorAll('.tier-img').forEach(img => setupImageInteraction(img, interactiveZones));
-      unassignedSec.querySelectorAll('.tier-img').forEach(img => setupImageInteraction(img, interactiveZones));
+    // --- KATTINTÁSOS / ÉRINTÉSES MOZGATÁS LOGIKA ---
+    function handleImageClick(e, productId) {
+      e.stopPropagation(); // Ne buborékoljon fel a zónára
+      
+      if (selectedProductId === productId) {
+        // Ha ugyanarra kattint, akkor megszüntetjük a kijelölést
+        selectedProductId = null;
+      } else {
+        selectedProductId = productId;
+      }
+      renderMyView();
     }
 
-    function setupImageInteraction(img, zones) {
-      let holdTimer = null;
-      let isDragging = false;
-      let floatingClone = null;
-      let startX, startY;
+    function handleZoneClick(e, zone) {
+      if (!selectedProductId) return; // Ha nincs kiválasztva kép, nem csinál semmit
 
-      const getClientCoords = (e) => {
-        if (e.touches && e.touches.length > 0) {
-          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        }
-        return { x: e.clientX, y: e.clientY };
-      };
+      const targetTier = parseInt(zone.getAttribute('data-tier'), 10);
 
-      const onStart = (e) => {
-        if (isDragging) return;
-        const coords = getClientCoords(e);
-        startX = coords.x;
-        startY = coords.y;
-
-        // 500ms hosszú érintés indítása
-        holdTimer = setTimeout(() => {
-          isDragging = true;
-          if (navigator.vibrate) navigator.vibrate(40); // Rezgés jelzésként
-
-          // Létrehozzuk a lebegő klón elemet, ami követi az ujjat/egeret
-          floatingClone = img.cloneNode(true);
-          floatingClone.className = 'tier-img floating';
-          document.body.appendChild(floatingClone);
-          
-          updateClonePosition(coords.x, coords.y);
-          img.style.opacity = '0.3';
-        }, 500);
-      };
-
-      const onMove = (e) => {
-        const coords = getClientCoords(e);
-
-        if (!isDragging && holdTimer) {
-          // Ha elmozdítja az ujját mielőtt letelt volna a 0.5mp, megszakítjuk (hagyjuk görgetni)
-          if (Math.abs(coords.x - startX) > 10 || Math.abs(coords.y - startY) > 10) {
-            clearTimeout(holdTimer);
-            holdTimer = null;
-          }
-        }
-
-        if (isDragging && floatingClone) {
-          e.preventDefault();
-          updateClonePosition(coords.x, coords.y);
-
-          // Vizuális visszajelzés a célzónákról
-          zones.forEach(zone => {
-            const rect = zone.getBoundingClientRect();
-            if (coords.x >= rect.left && coords.x <= rect.right && coords.y >= rect.top && coords.y <= rect.bottom) {
-              zone.classList.add('drag-hover');
-            } else {
-              zone.classList.remove('drag-hover');
-            }
-          });
-        }
-      };
-
-      const onEnd = (e) => {
-        if (holdTimer) {
-          clearTimeout(holdTimer);
-          holdTimer = null;
-        }
-
-        if (isDragging) {
-          isDragging = false;
-          const coords = e.changedTouches ? { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY } : { x: e.clientX, y: e.clientY };
-
-          if (floatingClone) {
-            floatingClone.remove();
-            floatingClone = null;
-          }
-          img.style.opacity = '1';
-
-          zones.forEach(zone => {
-            zone.classList.remove('drag-hover');
-            const rect = zone.getBoundingClientRect();
-            if (coords.x >= rect.left && coords.x <= rect.right && coords.y >= rect.top && coords.y <= rect.bottom) {
-              // Beszúrás a célzónába
-              const afterElement = getElementAfterPosition(zone, coords.x, coords.y);
-              if (afterElement == null) {
-                zone.appendChild(img);
-              } else {
-                zone.insertBefore(img, afterElement);
-              }
-
-              updateMyDataFromDOM();
-              saveToFirebase();
-              renderMyView();
-            }
-          });
-        }
-      };
-
-      function updateClonePosition(x, y) {
-        if (floatingClone) {
-          floatingClone.style.left = (x - 32) + 'px';
-          floatingClone.style.top = (y - 32) + 'px';
-        }
+      // Frissítjük az adatokat
+      const item = myData.find(i => i.id === selectedProductId);
+      if (item) {
+        item.t = targetTier;
+        // Új pozíció meghatározása a zónában
+        const itemsInZone = myData.filter(i => i.t === targetTier);
+        item.p = itemsInZone.length;
       }
 
-      function getElementAfterPosition(zone, x, y) {
-        const isHorizontal = zone.classList.contains('unassigned-zone') || zone.style.flexDirection === 'row' || window.getComputedStyle(zone).flexDirection === 'row';
-        const elements = [...zone.querySelectorAll('.tier-img')];
-
-        return elements.reduce((closest, child) => {
-          const box = child.getBoundingClientRect();
-          if (isHorizontal) {
-            const offset = x - box.left - box.width / 2;
-            if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
-          } else {
-            const offset = y - box.top - box.height / 2;
-            if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
-          }
-          return closest;
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
-      }
-
-      img.onmousedown = onStart;
-      window.onmousemove = onMove;
-      window.onmouseup = onEnd;
-
-      img.ontouchstart = onStart;
-      window.ontouchmove = onMove;
-      window.ontouchend = onEnd;
+      selectedProductId = null; // Kijelölés törlése mozgás után
+      updateMyDataFromDOMOrder();
+      saveToFirebase();
+      renderMyView();
     }
 
-    function updateMyDataFromDOM() {
+    function updateMyDataFromDOMOrder() {
       const updated = [];
       const zones = document.querySelectorAll('#tab-my .tier-row .tier-zone, .unassigned-zone');
       zones.forEach(zone => {
         const tier = parseInt(zone.getAttribute('data-tier'));
-        const images = zone.querySelectorAll('.tier-img');
-        images.forEach((img, idx) => {
-          updated.push({ id: img.getAttribute('data-id'), t: tier, p: tier === 0 ? 0 : idx + 1 });
+        const imgs = zone.querySelectorAll('.tier-img');
+        imgs.forEach((img, idx) => {
+          const id = img.getAttribute('data-id');
+          const item = myData.find(i => i.id === id);
+          if (item) {
+            item.t = tier;
+            item.p = tier === 0 ? 0 : idx + 1;
+            updated.push(item);
+          }
         });
+      });
+      // Biztosítjuk, hogy minden elem benne maradjon
+      myData.forEach(item => {
+        if (!updated.some(u => u.id === item.id)) {
+          updated.push(item);
+        }
       });
       myData = updated;
     }
 
-    function createImgElement(productId) {
+    function createImgElement(productId, isInteractive = false) {
       const prod = products.find(p => p.id === productId);
       const img = document.createElement('img');
-      img.src = prod.img; img.className = 'tier-img'; img.setAttribute('data-id', productId);
+      img.src = prod.img; 
+      img.className = 'tier-img'; 
+      img.setAttribute('data-id', productId);
+
+      if (isInteractive) {
+        if (productId === selectedProductId) {
+          img.classList.add('selected');
+        }
+        img.onclick = (e) => handleImageClick(e, productId);
+      }
       return img;
     }
 
@@ -466,6 +384,7 @@
       document.getElementById('name-input').value = '';
       
       roomData = {};
+      selectedProductId = null;
       resetMyDataToDefault();
       
       renderMyView();
@@ -516,18 +435,16 @@
         .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
 
       unassignedItems.forEach(item => {
-        const img = createImgElement(item.id);
+        const img = createImgElement(item.id, true);
         unassignedZone.appendChild(img);
       });
 
       const assignedItems = myData.filter(item => item.t > 0);
       assignedItems.forEach(item => {
-        const img = createImgElement(item.id);
+        const img = createImgElement(item.id, true);
         const zone = document.querySelector(`#my-board .tier-zone[data-tier="${item.t}"]`);
         if (zone) zone.appendChild(img);
       });
-
-      initCustomDragAndDrop();
     }
 
     function renderFriendView() {
@@ -538,7 +455,7 @@
       roomData[name].forEach(item => {
         if (item.t > 0) {
           const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
-          if (zone) zone.appendChild(createImgElement(item.id));
+          if (zone) zone.appendChild(createImgElement(item.id, false));
         }
       });
     }
@@ -577,7 +494,7 @@
       Object.keys(groupTiers).forEach(tLevel => {
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
-        groupTiers[tLevel].forEach(item => zone.appendChild(createImgElement(item.id)));
+        groupTiers[tLevel].forEach(item => zone.appendChild(createImgElement(item.id, false)));
       });
     }
 
