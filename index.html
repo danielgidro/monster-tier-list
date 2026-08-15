@@ -107,6 +107,12 @@
     .tier-img { 
       height: 65px; width: 65px; object-fit: contain; cursor: grab; user-select: none; border-radius: 6px; flex-shrink: 0;
       -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none;
+      touch-action: pan-x pan-y; /* Alapértelmezésben engedi a görgetést érintésre */
+    }
+    .tier-img.ready-to-drag {
+      touch-action: none; /* Ha letelt az időzítő, letiltjuk a görgetést ezen az elemen, hogy lehessen húzni */
+      transform: scale(1.08);
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
     }
     .tier-img:active { cursor: grabbing; }
     .tier-img.dragging { opacity: 0.3; }
@@ -164,7 +170,7 @@
   </div>
 
   <div class="unassigned-section">
-    <div class="unassigned-title">📦 Unassigned Items (Húzd oldalra ujjal)</div>
+    <div class="unassigned-title">📦 Unassigned Items (Tartsd nyomva a húzáshoz)</div>
     <div class="tier-zone unassigned-zone" data-tier="0"></div>
   </div>
 
@@ -231,10 +237,9 @@
     ];
 
     let roomData = {};
-    let currentConnectionRef = null; // Aktuális Firebase figyelő tárolása a leiratkozáshoz
+    let currentConnectionRef = null; 
     let myData = [];
     
-    // Alapértelmezett adatok betöltése (minden elem unassigned 0-s tierben)
     function resetMyDataToDefault() {
       myData = products.map(p => ({ id: p.id, t: 0, p: 0 }));
     }
@@ -310,10 +315,54 @@
     }
 
     function makeImgDraggable(img) {
-      img.draggable = true;
+      img.draggable = false; // Alapból kikapcsoljuk, hogy a natív drag ne zavarjon be azonnal
+      let holdTimer = null;
+
+      const startHold = (e) => {
+        // Ha már húzzuk vagy folyamatban van, kilépünk
+        if (holdTimer) clearTimeout(holdTimer);
+
+        holdTimer = setTimeout(() => {
+          img.draggable = true;
+          img.classList.add('ready-to-drag');
+          // Ha mobilon vagyunk és a DragDropTouch fut, szimulálunk egy érintési eseményt vagy engedjük a drag startot
+          if (navigator.vibrate) {
+            navigator.vibrate(50); // Kis rezgéssel jelzi, hogy húzható
+          }
+        }, 500); // 500 milliszekundum (fél másodperc) nyomvatartás szükséges
+      };
+
+      const cancelHold = () => {
+        if (holdTimer) {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+        img.draggable = false;
+        img.classList.remove('ready-to-drag');
+      };
+
+      img.addEventListener('mousedown', startHold);
+      img.addEventListener('touchstart', startHold, { passive: true });
+
+      img.addEventListener('mouseup', cancelHold);
+      img.addEventListener('touchend', cancelHold);
+      img.addEventListener('touchmove', cancelHold); // Ha elmozdítja az ujját mielőtt letelt volna, megszakítjuk (így marad a görgetés)
+
       img.addEventListener('contextmenu', e => e.preventDefault());
-      img.addEventListener('dragstart', () => { draggedImg = img; img.classList.add('dragging'); });
-      img.addEventListener('dragend', () => { img.classList.remove('dragging'); draggedImg = null; });
+      img.addEventListener('dragstart', (e) => {
+        if (!img.draggable) {
+          e.preventDefault();
+          return;
+        }
+        draggedImg = img; 
+        img.classList.add('dragging'); 
+      });
+      img.addEventListener('dragend', () => { 
+        img.classList.remove('dragging'); 
+        img.classList.remove('ready-to-drag');
+        img.draggable = false;
+        draggedImg = null; 
+      });
     }
 
     function updateMyDataFromDOM() {
@@ -345,7 +394,7 @@
       if (userName) localStorage.setItem('monster_name', userName);
 
       if (currentConnectionRef) {
-        currentConnectionRef.off(); // Előző figyelés lekapcsolása
+        currentConnectionRef.off();
       }
 
       currentConnectionRef = db.ref('rooms/' + room);
