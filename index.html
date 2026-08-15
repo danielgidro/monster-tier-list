@@ -77,7 +77,6 @@
     }
     .tier-zone::-webkit-scrollbar { height: 6px; }
     .tier-zone::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-    .tier-zone.selected-zone { background: rgba(48, 209, 88, 0.15); border: 2px dashed var(--accent); }
 
     .unassigned-section { 
       position: fixed;
@@ -92,7 +91,7 @@
       box-shadow: 0 -4px 20px rgba(0,0,0,0.8);
       box-sizing: border-box;
     }
-    .unassigned-title { font-size: 12px; font-weight: bold; color: #8e8e93; margin-bottom: 6px; text-transform: uppercase; }
+    .unassigned-title { font-size: 11px; font-weight: bold; color: #8e8e93; margin-bottom: 6px; text-transform: uppercase; }
 
     .unassigned-zone {
       display: flex !important;
@@ -172,7 +171,7 @@
   </div>
 
   <div class="unassigned-section">
-    <div class="unassigned-title">📦 Kattints egy képre, majd kattints a cél sávra!</div>
+    <div class="unassigned-title">📦 Kattints egy képre, majd egy másikra (elé teszi) vagy üres sávra (végére teszi)</div>
     <div class="tier-zone unassigned-zone" data-tier="0" onclick="handleZoneClick(event, this)"></div>
   </div>
 
@@ -241,7 +240,7 @@
     let roomData = {};
     let currentConnectionRef = null; 
     let myData = [];
-    let selectedProductId = null; // A kiválasztott termék ID-je
+    let selectedProductId = null; 
     
     function resetMyDataToDefault() {
       myData = products.map(p => ({ id: p.id, t: 0, p: 0 }));
@@ -271,62 +270,90 @@
       });
     }
 
-    // --- KATTINTÁSOS / ÉRINTÉSES MOZGATÁS LOGIKA ---
-    function handleImageClick(e, productId) {
-      e.stopPropagation(); // Ne buborékoljon fel a zónára
-      
-      if (selectedProductId === productId) {
-        // Ha ugyanarra kattint, akkor megszüntetjük a kijelölést
+    // --- KATTINTÁSOS / POZICIONÁLÓ LOGIKA ---
+    function handleImageClick(e, clickedId) {
+      e.stopPropagation(); // Megakadályozza, hogy a mögötte lévő sáv is lefusson
+
+      if (!selectedProductId) {
+        // Nincs kiválasztva semmi -> ez lesz a kiválasztott
+        selectedProductId = clickedId;
+      } else if (selectedProductId === clickedId) {
+        // Ugyanarra kattintott -> kijelölés törlése
         selectedProductId = null;
       } else {
-        selectedProductId = productId;
+        // Már volt kiválasztva egy, és rákattintott egy másikra -> beillesztés a másik elé
+        moveProductBefore(selectedProductId, clickedId);
+        selectedProductId = null;
+        saveToFirebase();
       }
       renderMyView();
     }
 
     function handleZoneClick(e, zone) {
-      if (!selectedProductId) return; // Ha nincs kiválasztva kép, nem csinál semmit
+      if (!selectedProductId) return; // Ha nincs kijelölt termék, nem csinál semmit
 
       const targetTier = parseInt(zone.getAttribute('data-tier'), 10);
+      const sourceIndex = myData.findIndex(i => i.id === selectedProductId);
+      if (sourceIndex === -1) return;
 
-      // Frissítjük az adatokat
-      const item = myData.find(i => i.id === selectedProductId);
-      if (item) {
-        item.t = targetTier;
-        // Új pozíció meghatározása a zónában
-        const itemsInZone = myData.filter(i => i.t === targetTier);
-        item.p = itemsInZone.length;
+      const sourceItem = myData[sourceIndex];
+      sourceItem.t = targetTier;
+
+      // Kivesszük és a sáv végére rakjuk
+      myData.splice(sourceIndex, 1);
+      
+      if (targetTier === 0) {
+        myData.push(sourceItem);
+      } else {
+        let lastIndex = -1;
+        for (let i = 0; i < myData.length; i++) {
+          if (myData[i].t === targetTier) lastIndex = i;
+        }
+        if (lastIndex !== -1) {
+          myData.splice(lastIndex + 1, 0, sourceItem);
+        } else {
+          myData.push(sourceItem);
+        }
       }
 
-      selectedProductId = null; // Kijelölés törlése mozgás után
-      updateMyDataFromDOMOrder();
+      updatePositions();
+      selectedProductId = null;
       saveToFirebase();
       renderMyView();
     }
 
-    function updateMyDataFromDOMOrder() {
-      const updated = [];
-      const zones = document.querySelectorAll('#tab-my .tier-row .tier-zone, .unassigned-zone');
-      zones.forEach(zone => {
-        const tier = parseInt(zone.getAttribute('data-tier'));
-        const imgs = zone.querySelectorAll('.tier-img');
-        imgs.forEach((img, idx) => {
-          const id = img.getAttribute('data-id');
-          const item = myData.find(i => i.id === id);
-          if (item) {
-            item.t = tier;
-            item.p = tier === 0 ? 0 : idx + 1;
-            updated.push(item);
+    function moveProductBefore(sourceId, targetId) {
+      const sourceIndex = myData.findIndex(i => i.id === sourceId);
+      const targetIndex = myData.findIndex(i => i.id === targetId);
+      if (sourceIndex === -1 || targetIndex === -1) return;
+
+      const sourceItem = myData[sourceIndex];
+      const targetItem = myData[targetIndex];
+
+      // Átállítjuk a tier-t a céltermékére
+      sourceItem.t = targetItem.t;
+
+      // Eltávolítjuk a forrást
+      myData.splice(sourceIndex, 1);
+
+      // Újra megkeressük a célt (mivel a törlés miatt eltolódhatott az index)
+      const newTargetIndex = myData.findIndex(i => i.id === targetId);
+      
+      // Beszúrjuk elé
+      myData.splice(newTargetIndex, 0, sourceItem);
+
+      updatePositions();
+    }
+
+    function updatePositions() {
+      for (let tier = 0; tier <= 5; tier++) {
+        let pos = 1;
+        myData.forEach(item => {
+          if (item.t === tier) {
+            item.p = tier === 0 ? 0 : pos++;
           }
         });
-      });
-      // Biztosítjuk, hogy minden elem benne maradjon
-      myData.forEach(item => {
-        if (!updated.some(u => u.id === item.id)) {
-          updated.push(item);
-        }
-      });
-      myData = updated;
+      }
     }
 
     function createImgElement(productId, isInteractive = false) {
@@ -363,6 +390,7 @@
         
         if (userName && roomData[userName]) {
           myData = roomData[userName];
+          updatePositions();
           renderMyView();
         }
 
@@ -431,19 +459,23 @@
       const unassignedZone = document.querySelector('.unassigned-zone');
       unassignedZone.innerHTML = '';
 
-      const unassignedItems = myData.filter(item => item.t === 0)
-        .sort((a, b) => parseInt(a.id, 10) - parseInt(b.id, 10));
+      // Tiers szerinti rendezés p (pozíció) alapján
+      const sortedData = [...myData].sort((a, b) => {
+        if (a.t !== b.t) return a.t - b.t;
+        return a.p - b.p;
+      });
 
-      unassignedItems.forEach(item => {
+      sortedData.filter(item => item.t === 0).forEach(item => {
         const img = createImgElement(item.id, true);
         unassignedZone.appendChild(img);
       });
 
-      const assignedItems = myData.filter(item => item.t > 0);
-      assignedItems.forEach(item => {
-        const img = createImgElement(item.id, true);
-        const zone = document.querySelector(`#my-board .tier-zone[data-tier="${item.t}"]`);
-        if (zone) zone.appendChild(img);
+      tierLevels.forEach(tl => {
+        const zone = document.querySelector(`#my-board .tier-zone[data-tier="${tl.level}"]`);
+        sortedData.filter(item => item.t === tl.level).forEach(item => {
+          const img = createImgElement(item.id, true);
+          zone.appendChild(img);
+        });
       });
     }
 
@@ -452,7 +484,12 @@
       const name = document.getElementById('friend-select').value;
       if (!name || !roomData[name]) return;
 
-      roomData[name].forEach(item => {
+      const friendItems = [...roomData[name]].sort((a, b) => {
+        if (a.t !== b.t) return a.t - b.t;
+        return a.p - b.p;
+      });
+
+      friendItems.forEach(item => {
         if (item.t > 0) {
           const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
           if (zone) zone.appendChild(createImgElement(item.id, false));
