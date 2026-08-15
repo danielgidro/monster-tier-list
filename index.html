@@ -90,6 +90,7 @@
       border-top: 1px solid #3a3a3c; 
       box-shadow: 0 -4px 20px rgba(0,0,0,0.8);
       box-sizing: border-box;
+      display: none; /* Alapból rejtve */
     }
     .unassigned-title { font-size: 11px; font-weight: bold; color: #8e8e93; margin-bottom: 6px; text-transform: uppercase; }
 
@@ -270,18 +271,14 @@
       });
     }
 
-    // --- KATTINTÁSOS / POZICIONÁLÓ LOGIKA ---
     function handleImageClick(e, clickedId) {
-      e.stopPropagation(); // Megakadályozza, hogy a mögötte lévő sáv is lefusson
+      e.stopPropagation();
 
       if (!selectedProductId) {
-        // Nincs kiválasztva semmi -> ez lesz a kiválasztott
         selectedProductId = clickedId;
       } else if (selectedProductId === clickedId) {
-        // Ugyanarra kattintott -> kijelölés törlése
         selectedProductId = null;
       } else {
-        // Már volt kiválasztva egy, és rákattintott egy másikra -> beillesztés a másik elé
         moveProductBefore(selectedProductId, clickedId);
         selectedProductId = null;
         saveToFirebase();
@@ -290,7 +287,7 @@
     }
 
     function handleZoneClick(e, zone) {
-      if (!selectedProductId) return; // Ha nincs kijelölt termék, nem csinál semmit
+      if (!selectedProductId) return;
 
       const targetTier = parseInt(zone.getAttribute('data-tier'), 10);
       const sourceIndex = myData.findIndex(i => i.id === selectedProductId);
@@ -299,7 +296,6 @@
       const sourceItem = myData[sourceIndex];
       sourceItem.t = targetTier;
 
-      // Kivesszük és a sáv végére rakjuk
       myData.splice(sourceIndex, 1);
       
       if (targetTier === 0) {
@@ -330,16 +326,10 @@
       const sourceItem = myData[sourceIndex];
       const targetItem = myData[targetIndex];
 
-      // Átállítjuk a tier-t a céltermékére
       sourceItem.t = targetItem.t;
-
-      // Eltávolítjuk a forrást
       myData.splice(sourceIndex, 1);
 
-      // Újra megkeressük a célt (mivel a törlés miatt eltolódhatott az index)
       const newTargetIndex = myData.findIndex(i => i.id === targetId);
-      
-      // Beszúrjuk elé
       myData.splice(newTargetIndex, 0, sourceItem);
 
       updatePositions();
@@ -419,7 +409,7 @@
       renderGroupView();
       updateFriendDropdown();
       
-      switchTab('my', document.querySelector('.nav-tabs button:nth-child(2)'));
+      switchTab('group', document.querySelector('.nav-tabs button:nth-child(1)'));
     }
 
     function saveToFirebase() {
@@ -459,7 +449,6 @@
       const unassignedZone = document.querySelector('.unassigned-zone');
       unassignedZone.innerHTML = '';
 
-      // Tiers szerinti rendezés p (pozíció) alapján
       const sortedData = [...myData].sort((a, b) => {
         if (a.t !== b.t) return a.t - b.t;
         return a.p - b.p;
