@@ -6,11 +6,25 @@
   <title>Monster Group TierApp</title>
   <style>
     :root {
-      --tier-5: #ff3b30; 
-      --tier-4: #ff9500; 
-      --tier-3: #ffcc00; 
-      --tier-2: #11a84e; 
-      --tier-1: #007aff; 
+      /* 5-csillagos mód színei */
+      --tier-5-5: #ff3b30; 
+      --tier-5-4: #ff9500; 
+      --tier-5-3: #ffcc00; 
+      --tier-5-2: #11a84e; 
+      --tier-5-1: #007aff; 
+
+      /* 10-csillagos mód színei (10->1) */
+      --tier-10-10: #ff3b30;
+      --tier-10-9: #ff6800;
+      --tier-10-8: #ff9500;
+      --tier-10-7: #ffb700;
+      --tier-10-6: #ffcc00;
+      --tier-10-5: #11a84e; /* 5 sotetkek helyett maradt a megbízható zöld/egyedi kérés alapján: 5 sotetkek */
+      --tier-10-4: #af52de; /* 4 lilla */
+      --tier-10-3: #a86422; /* 3 barna */
+      --tier-10-2: #2c2c2e; /* 2 fekete */
+      --tier-10-1: #ffffff; /* 1 feher */
+
       --bg-dark: #121212;
       --surface: #1c1c1e; 
       --accent: #30d158;
@@ -49,6 +63,14 @@
       background: var(--danger); color: #fff; flex: 1;
     }
 
+    /* Mode selector tabs (5★ vs 10★) */
+    .mode-tabs { display: flex; gap: 6px; margin-bottom: 8px; width: 100%; max-width: 800px; }
+    .mode-btn {
+      background: #222224; color: #8e8e93; border: 1px solid #3a3a3c; padding: 8px;
+      border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; flex: 1; text-align: center;
+    }
+    .mode-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
+
     .nav-tabs { display: flex; gap: 6px; margin-bottom: 10px; width: 100%; max-width: 800px; }
     .tab-btn {
       background: #2c2c2e; color: #8e8e93; border: none; padding: 8px 6px;
@@ -60,27 +82,40 @@
     .tab-content.active { display: block; }
 
     .tier-board { display: flex; flex-direction: column; gap: 4px; background: #000; padding: 4px; border-radius: 8px; width: 100%; box-sizing: border-box; }
-    .tier-row { display: flex; background: var(--surface); min-height: 55px; border-radius: 6px; overflow: hidden; }
+    .tier-row { display: flex; background: var(--surface); min-height: 45px; border-radius: 6px; overflow: hidden; }
     .tier-badge {
       width: 42px; display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 14px; color: #000; flex-shrink: 0;
+      font-weight: 800; font-size: 13px; color: #000; flex-shrink: 0;
     }
-    .badge-5 { background: var(--tier-5); }
-    .badge-4 { background: var(--tier-4); }
-    .badge-3 { background: var(--tier-3); }
-    .badge-2 { background: var(--tier-2); }
-    .badge-1 { background: var(--tier-1); }
+    
+    /* 5★ Badges */
+    .badge-5-5 { background: var(--tier-5-5); }
+    .badge-5-4 { background: var(--tier-5-4); }
+    .badge-5-3 { background: var(--tier-5-3); }
+    .badge-5-2 { background: var(--tier-5-2); }
+    .badge-5-1 { background: var(--tier-5-1); }
+
+    /* 10★ Badges (kérésre szabott színekkel) */
+    .badge-10-10 { background: var(--tier-10-10); }
+    .badge-10-9  { background: var(--tier-10-9); }
+    .badge-10-8  { background: var(--tier-10-8); }
+    .badge-10-7  { background: var(--tier-10-7); }
+    .badge-10-6  { background: var(--tier-10-6); }
+    .badge-10-5  { background: #000080; color: #fff; } /* 5 sotetkek */
+    .badge-10-4  { background: var(--tier-10-4); color: #fff; } /* 4 lilla */
+    .badge-10-3  { background: var(--tier-10-3); color: #fff; } /* 3 barna */
+    .badge-10-2  { background: var(--tier-10-2); color: #fff; border: 1px solid #444; } /* 2 fekete */
+    .badge-10-1  { background: var(--tier-10-1); color: #000; } /* 1 feher */
 
     .tier-zone { 
       flex: 1; display: flex; flex-direction: row; 
-      align-items: center; gap: 4px; padding: 4px; min-height: 45px; 
+      align-items: center; gap: 4px; padding: 4px; min-height: 40px; 
       overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
       cursor: pointer;
     }
     .tier-zone::-webkit-scrollbar { height: 4px; }
     .tier-zone::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
 
-    /* Eredeti 3D dobogó stílus visszahozva, de kompakt méretekkel, hogy kiférjen */
     .podium-container {
       display: flex;
       justify-content: center;
@@ -204,6 +239,12 @@
     </div>
   </div>
 
+  <!-- Mode Selector Buttons (5★ vs 10★) -->
+  <div class="mode-tabs">
+    <button id="mode-5-btn" class="mode-btn active" onclick="switchMode(5)">⭐ 5-csillagos Mód</button>
+    <button id="mode-10-btn" class="mode-btn" onclick="switchMode(10)">🌟 10-csillagos Mód</button>
+  </div>
+
   <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('group', this)">📊 Group Tier</button>
     <button class="tab-btn" onclick="switchTab('my', this)">✏️ My Tier</button>
@@ -285,26 +326,63 @@
       { id: '31', name: 'VR46 Zero',                img: 'VR46 Zero.png' }
     ];
 
+    let currentMode = 5; // 5 vagy 10
     let roomData = {};
     let currentConnectionRef = null; 
-    let myData = [];
+    let myData = {
+      5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      10: products.map(p => ({ id: p.id, t: 0, p: 0 }))
+    };
     let selectedProductId = null; 
-    
-    function resetMyDataToDefault() {
-      myData = products.map(p => ({ id: p.id, t: 0, p: 0 }));
-    }
-    resetMyDataToDefault();
 
-    const tierLevels = [
-      { level: 5, label: '5★', class: 'badge-5' }, { level: 4, label: '4★', class: 'badge-4' },
-      { level: 3, label: '3★', class: 'badge-3' }, { level: 2, label: '2★', class: 'badge-2' },
-      { level: 1, label: '1★', class: 'badge-1' }
+    const tierLevels5 = [
+      { level: 5, label: '5★', class: 'badge-5-5' }, 
+      { level: 4, label: '4★', class: 'badge-5-4' },
+      { level: 3, label: '3★', class: 'badge-5-3' }, 
+      { level: 2, label: '2★', class: 'badge-5-2' },
+      { level: 1, label: '1★', class: 'badge-5-1' }
     ];
+
+    const tierLevels10 = [
+      { level: 10, label: '10★', class: 'badge-10-10' },
+      { level: 9,  label: '9★',  class: 'badge-10-9' },
+      { level: 8,  label: '8★',  class: 'badge-10-8' },
+      { level: 7,  label: '7★',  class: 'badge-10-7' },
+      { level: 6,  label: '6★',  class: 'badge-10-6' },
+      { level: 5,  label: '5★',  class: 'badge-10-5' },
+      { level: 4,  label: '4★',  class: 'badge-10-4' },
+      { level: 3,  label: '3★',  class: 'badge-10-3' },
+      { level: 2,  label: '2★',  class: 'badge-10-2' },
+      { level: 1,  label: '1★',  class: 'badge-10-1' }
+    ];
+
+    function getCurrentTierLevels() {
+      return currentMode === 5 ? tierLevels5 : tierLevels10;
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      selectedProductId = null;
+      
+      document.getElementById('mode-5-btn').classList.toggle('active', mode === 5);
+      document.getElementById('mode-10-btn').classList.toggle('active', mode === 10);
+
+      renderActiveTab();
+    }
+
+    function renderActiveTab() {
+      const activeTab = document.querySelector('.tab-content.active').id;
+      if (activeTab === 'tab-group') renderGroupView();
+      if (activeTab === 'tab-my') renderMyView();
+      if (activeTab === 'tab-friends') renderFriendView();
+    }
 
     function buildBoard(containerId, isInteractive = false) {
       const container = document.getElementById(containerId);
       container.innerHTML = '';
-      tierLevels.forEach(tl => {
+      const levels = getCurrentTierLevels();
+      
+      levels.forEach(tl => {
         const row = document.createElement('div');
         row.className = 'tier-row';
         
@@ -320,6 +398,7 @@
 
     function handleImageClick(e, clickedId) {
       e.stopPropagation();
+      const currentList = myData[currentMode];
 
       if (!selectedProductId) {
         selectedProductId = clickedId;
@@ -337,55 +416,59 @@
       if (!selectedProductId) return;
 
       const targetTier = parseInt(zone.getAttribute('data-tier'), 10);
-      const sourceIndex = myData.findIndex(i => i.id === selectedProductId);
+      const currentList = myData[currentMode];
+      const sourceIndex = currentList.findIndex(i => i.id === selectedProductId);
       if (sourceIndex === -1) return;
 
-      const sourceItem = myData[sourceIndex];
+      const sourceItem = currentList[sourceIndex];
       sourceItem.t = targetTier;
 
-      myData.splice(sourceIndex, 1);
+      currentList.splice(sourceIndex, 1);
       
       if (targetTier === 0) {
-        myData.push(sourceItem);
+        currentList.push(sourceItem);
       } else {
         let lastIndex = -1;
-        for (let i = 0; i < myData.length; i++) {
-          if (myData[i].t === targetTier) lastIndex = i;
+        for (let i = 0; i < currentList.length; i++) {
+          if (currentList[i].t === targetTier) lastIndex = i;
         }
         if (lastIndex !== -1) {
-          myData.splice(lastIndex + 1, 0, sourceItem);
+          currentList.splice(lastIndex + 1, 0, sourceItem);
         } else {
-          myData.push(sourceItem);
+          currentList.push(sourceItem);
         }
       }
 
-      updatePositions();
+      updatePositions(currentMode);
       selectedProductId = null;
       saveToFirebase();
       renderMyView();
     }
 
     function moveProductBefore(sourceId, targetId) {
-      const sourceIndex = myData.findIndex(i => i.id === sourceId);
-      const targetIndex = myData.findIndex(i => i.id === targetId);
+      const currentList = myData[currentMode];
+      const sourceIndex = currentList.findIndex(i => i.id === sourceId);
+      const targetIndex = currentList.findIndex(i => i.id === targetId);
       if (sourceIndex === -1 || targetIndex === -1) return;
 
-      const sourceItem = myData[sourceIndex];
-      const targetItem = myData[targetIndex];
+      const sourceItem = currentList[sourceIndex];
+      const targetItem = currentList[targetIndex];
 
       sourceItem.t = targetItem.t;
-      myData.splice(sourceIndex, 1);
+      currentList.splice(sourceIndex, 1);
 
-      const newTargetIndex = myData.findIndex(i => i.id === targetId);
-      myData.splice(newTargetIndex, 0, sourceItem);
+      const newTargetIndex = currentList.findIndex(i => i.id === targetId);
+      currentList.splice(newTargetIndex, 0, sourceItem);
 
-      updatePositions();
+      updatePositions(currentMode);
     }
 
-    function updatePositions() {
-      for (let tier = 0; tier <= 5; tier++) {
+    function updatePositions(mode) {
+      const list = myData[mode];
+      const maxTier = mode === 5 ? 5 : 10;
+      for (let tier = 0; tier <= maxTier; tier++) {
         let pos = 1;
-        myData.forEach(item => {
+        list.forEach(item => {
           if (item.t === tier) {
             item.p = tier === 0 ? 0 : pos++;
           }
@@ -426,13 +509,20 @@
         roomData = snapshot.val() || {};
         
         if (userName && roomData[userName]) {
-          myData = roomData[userName];
-          updatePositions();
-          renderMyView();
+          const remoteData = roomData[userName];
+          // Kompatibilitás kezelése: ha a szerveren még a régi listás formátum van vagy külön mode-os
+          if (Array.isArray(remoteData)) {
+            myData[5] = remoteData;
+          } else if (remoteData['5'] || remoteData['10']) {
+            if (remoteData['5']) myData[5] = remoteData['5'];
+            if (remoteData['10']) myData[10] = remoteData['10'];
+          }
+          updatePositions(5);
+          updatePositions(10);
         }
 
         updateFriendDropdown();
-        renderGroupView();
+        renderActiveTab();
       });
     }
 
@@ -450,10 +540,12 @@
       
       roomData = {};
       selectedProductId = null;
-      resetMyDataToDefault();
+      myData = {
+        5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+        10: products.map(p => ({ id: p.id, t: 0, p: 0 }))
+      };
       
-      renderMyView();
-      renderGroupView();
+      renderActiveTab();
       updateFriendDropdown();
       
       switchTab('group', document.querySelector('.nav-tabs button:nth-child(1)'));
@@ -464,7 +556,17 @@
       const userName = document.getElementById('name-input').value.trim();
       if (!room || !userName) return;
 
-      db.ref(`rooms/${room}/${userName}`).set(myData);
+      // Mentés objektumként a két módhoz külön
+      db.ref(`rooms/${room}/${userName}`).set({
+        '5': myData[5],
+        '10': myData[10]
+      });
+    }
+
+    function getSubmissionsForMode(userObj, mode) {
+      if (!userObj) return null;
+      if (Array.isArray(userObj)) return mode === 5 ? userObj : null;
+      return userObj[mode] || null;
     }
 
     function updateFriendDropdown() {
@@ -496,7 +598,8 @@
       const unassignedZone = document.querySelector('.unassigned-zone');
       unassignedZone.innerHTML = '';
 
-      const sortedData = [...myData].sort((a, b) => {
+      const currentList = myData[currentMode];
+      const sortedData = [...currentList].sort((a, b) => {
         if (a.t !== b.t) return a.t - b.t;
         return a.p - b.p;
       });
@@ -506,12 +609,14 @@
         unassignedZone.appendChild(img);
       });
 
-      tierLevels.forEach(tl => {
+      getCurrentTierLevels().forEach(tl => {
         const zone = document.querySelector(`#my-board .tier-zone[data-tier="${tl.level}"]`);
-        sortedData.filter(item => item.t === tl.level).forEach(item => {
-          const img = createImgElement(item.id, true);
-          zone.appendChild(img);
-        });
+        if (zone) {
+          sortedData.filter(item => item.t === tl.level).forEach(item => {
+            const img = createImgElement(item.id, true);
+            zone.appendChild(img);
+          });
+        }
       });
     }
 
@@ -520,7 +625,10 @@
       const name = document.getElementById('friend-select').value;
       if (!name || !roomData[name]) return;
 
-      const friendItems = [...roomData[name]].sort((a, b) => {
+      const userSubmissions = getSubmissionsForMode(roomData[name], currentMode);
+      if (!userSubmissions) return;
+
+      const friendItems = [...userSubmissions].sort((a, b) => {
         if (a.t !== b.t) return a.t - b.t;
         return a.p - b.p;
       });
@@ -538,7 +646,12 @@
       const podium = document.getElementById('podium');
       podium.innerHTML = '';
 
-      const allSubmissions = Object.values(roomData);
+      const allSubmissions = [];
+      Object.values(roomData).forEach(userObj => {
+        const sub = getSubmissionsForMode(userObj, currentMode);
+        if (sub) allSubmissions.push(sub);
+      });
+
       if (allSubmissions.length === 0) return;
 
       const stats = {};
@@ -558,24 +671,45 @@
         id: s.id, avgStars: s.starSum / s.count, posPoints: s.posSum
       }));
 
-      const groupTiers = { 5:[], 4:[], 3:[], 2:[], 1:[] };
+      const groupTiers = {};
+      const levels = getCurrentTierLevels();
+      levels.forEach(tl => groupTiers[tl.level] = []);
+
       processed.forEach(i => {
-        if (i.avgStars >= 4.5) groupTiers[5].push(i);
-        else if (i.avgStars >= 3.5) groupTiers[4].push(i);
-        else if (i.avgStars >= 2.5) groupTiers[3].push(i);
-        else if (i.avgStars >= 1.5) groupTiers[2].push(i);
-        else groupTiers[1].push(i);
+        let assigned = false;
+        if (currentMode === 5) {
+          if (i.avgStars >= 4.5) groupTiers[5].push(i);
+          else if (i.avgStars >= 3.5) groupTiers[4].push(i);
+          else if (i.avgStars >= 2.5) groupTiers[3].push(i);
+          else if (i.avgStars >= 1.5) groupTiers[2].push(i);
+          else groupTiers[1].push(i);
+        } else {
+          // 10-csillagos elosztás küszöbértékei
+          let rounded = Math.round(i.avgStars);
+          if (rounded < 1) rounded = 1;
+          if (rounded > 10) rounded = 10;
+          if (groupTiers[rounded]) {
+            groupTiers[rounded].push(i);
+          } else {
+            groupTiers[1].push(i);
+          }
+        }
       });
 
       Object.keys(groupTiers).forEach(tLevel => {
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
-        groupTiers[tLevel].forEach(item => zone.appendChild(createImgElement(item.id, false)));
+        if (zone) {
+          groupTiers[tLevel].forEach(item => zone.appendChild(createImgElement(item.id, false)));
+        }
       });
 
       const sortedGroupItems = [];
-      [5, 4, 3, 2, 1].forEach(tLevel => {
-        groupTiers[tLevel].forEach(item => sortedGroupItems.push(item));
+      const levelNums = levels.map(l => l.level).sort((a,b) => b - a);
+      levelNums.forEach(tLevel => {
+        if (groupTiers[tLevel]) {
+          groupTiers[tLevel].forEach(item => sortedGroupItems.push(item));
+        }
       });
 
       const top5 = sortedGroupItems.slice(0, 5);
@@ -622,9 +756,7 @@
         unassignedSection.style.display = 'none';
       }
 
-      if (tabId === 'group') renderGroupView();
-      if (tabId === 'my') renderMyView();
-      if (tabId === 'friends') renderFriendView();
+      renderActiveTab();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -633,8 +765,7 @@
       if (savedRoom) document.getElementById('room-input').value = savedRoom;
       if (savedName) document.getElementById('name-input').value = savedName;
       
-      renderMyView();
-      renderGroupView();
+      renderActiveTab();
 
       if (savedRoom) {
         connectToRoom();
