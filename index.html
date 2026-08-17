@@ -6,24 +6,22 @@
   <title>Monster Group TierApp</title>
   <style>
     :root {
-      /* 5-csillagos mód színei */
       --tier-5-5: #ff3b30; 
       --tier-5-4: #ff9500; 
       --tier-5-3: #ffcc00; 
       --tier-5-2: #11a84e; 
       --tier-5-1: #007aff; 
 
-      /* 10-csillagos mód színei (10->1) */
       --tier-10-10: #ff3b30;
       --tier-10-9: #ff9500;
       --tier-10-8: #ffcc00;
       --tier-10-7: #11a84e;
       --tier-10-6: #007aff;
-      --tier-10-5: #3d499f; /* 5 sotetkek helyett maradt a megbízható zöld/egyedi kérés alapján: 5 sotetkek */
-      --tier-10-4: #5b21b6; /* 4 lilla */
-      --tier-10-3: #a86422; /* 3 barna */
-      --tier-10-2: #2c2c2e; /* 2 fekete */
-      --tier-10-1: #ffffff; /* 1 feher */
+      --tier-10-5: #3d499f; 
+      --tier-10-4: #5b21b6; 
+      --tier-10-3: #a86422; 
+      --tier-10-2: #2c2c2e; 
+      --tier-10-1: #ffffff;
 
       --bg-dark: #121212;
       --surface: #1c1c1e; 
@@ -63,7 +61,6 @@
       background: var(--danger); color: #fff; flex: 1;
     }
 
-    /* Mode selector tabs (5★ vs 10★) */
     .mode-tabs { display: flex; gap: 6px; margin-bottom: 8px; width: 100%; max-width: 800px; }
     .mode-btn {
       background: #222224; color: #8e8e93; border: 1px solid #3a3a3c; padding: 8px;
@@ -88,24 +85,22 @@
       font-weight: 800; font-size: 13px; color: #000; flex-shrink: 0;
     }
     
-    /* 5★ Badges */
     .badge-5-5 { background: var(--tier-5-5); }
     .badge-5-4 { background: var(--tier-5-4); }
     .badge-5-3 { background: var(--tier-5-3); }
     .badge-5-2 { background: var(--tier-5-2); }
     .badge-5-1 { background: var(--tier-5-1); }
 
-    /* 10★ Badges (kérésre szabott színekkel) */
     .badge-10-10 { background: var(--tier-10-10); }
     .badge-10-9  { background: var(--tier-10-9); }
     .badge-10-8  { background: var(--tier-10-8); }
     .badge-10-7  { background: var(--tier-10-7); }
     .badge-10-6  { background: var(--tier-10-6); }
-    .badge-10-5  { background: #000080; color: #000; } /* 5 sotetkek */
-    .badge-10-4  { background: var(--tier-10-4); color: #000; } /* 4 lilla */
-    .badge-10-3  { background: var(--tier-10-3); color: #000; } /* 3 barna */
-    .badge-10-2  { background: var(--tier-10-2); color: #fff; } /* 2 fekete */
-    .badge-10-1  { background: var(--tier-10-1); color: #000; } /* 1 feher */
+    .badge-10-5  { background: #000080; color: #000; }
+    .badge-10-4  { background: var(--tier-10-4); color: #000; }
+    .badge-10-3  { background: var(--tier-10-3); color: #000; }
+    .badge-10-2  { background: var(--tier-10-2); color: #fff; }
+    .badge-10-1  { background: var(--tier-10-1); color: #000; }
 
     .tier-zone { 
       flex: 1; display: flex; flex-direction: row; 
@@ -239,7 +234,6 @@
     </div>
   </div>
 
-  <!-- Mode Selector Buttons (5★ vs 10★) -->
   <div class="mode-tabs">
     <button id="mode-5-btn" class="mode-btn active" onclick="switchMode(5)">⭐ 5 Star Mod</button>
     <button id="mode-10-btn" class="mode-btn" onclick="switchMode(10)">🌟 10 Star Mod</button>
@@ -326,7 +320,7 @@
       { id: '31', name: 'VR46 Zero',                img: 'VR46 Zero.png' }
     ];
 
-    let currentMode = 5; // 5 vagy 10
+    let currentMode = 5;
     let roomData = {};
     let currentConnectionRef = null; 
     let myData = {
@@ -510,7 +504,6 @@
         
         if (userName && roomData[userName]) {
           const remoteData = roomData[userName];
-          // Kompatibilitás kezelése: ha a szerveren még a régi listás formátum van vagy külön mode-os
           if (Array.isArray(remoteData)) {
             myData[5] = remoteData;
           } else if (remoteData['5'] || remoteData['10']) {
@@ -556,7 +549,6 @@
       const userName = document.getElementById('name-input').value.trim();
       if (!room || !userName) return;
 
-      // Mentés objektumként a két módhoz külön
       db.ref(`rooms/${room}/${userName}`).set({
         '5': myData[5],
         '10': myData[10]
@@ -684,7 +676,6 @@
           else if (i.avgStars >= 1.5) groupTiers[2].push(i);
           else groupTiers[1].push(i);
         } else {
-          // 10-csillagos elosztás küszöbértékei
           let rounded = Math.round(i.avgStars);
           if (rounded < 1) rounded = 1;
           if (rounded > 10) rounded = 10;
