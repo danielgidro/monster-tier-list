@@ -627,7 +627,7 @@
       const list = myData[mode];
       const activeProds = (typeof mode === 'string' && categoryNames[mode]) 
         ? products.filter(p => p.category === mode) 
-        : products;
+        : [];
       const activeIds = activeProds.map(p => p.id);
 
       const maxTier = mode === 5 ? 5 : (mode === 10 ? 10 : 1);
@@ -772,26 +772,29 @@
       const unassignedZone = document.querySelector('.unassigned-zone');
       unassignedZone.innerHTML = '';
 
+      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
       const activeProds = getActiveProducts();
       const activeIds = activeProds.map(p => p.id);
       const currentList = myData[currentMode];
       
       const sortedData = [...currentList]
-        .filter(item => activeIds.includes(item.id))
+        .filter(item => !isCategory || activeIds.includes(item.id))
         .sort((a, b) => {
           if (a.t !== b.t) return a.t - b.t;
           return a.p - b.p;
         });
 
-      activeIds.forEach((id, index) => {
-        const slot = document.createElement('div');
-        slot.className = 'slot-cell';
-        const num = document.createElement('span');
-        num.className = 'slot-number';
-        num.innerText = index + 1;
-        slot.appendChild(num);
-        unassignedZone.appendChild(slot);
-      });
+      if (isCategory) {
+        activeIds.forEach((id, index) => {
+          const slot = document.createElement('div');
+          slot.className = 'slot-cell';
+          const num = document.createElement('span');
+          num.className = 'slot-number';
+          num.innerText = index + 1;
+          slot.appendChild(num);
+          unassignedZone.appendChild(slot);
+        });
+      }
 
       sortedData.filter(item => item.t === 0).forEach(item => {
         const img = createImgElement(item.id, true);
@@ -801,15 +804,17 @@
       getCurrentTierLevels().forEach(tl => {
         const zone = document.querySelector(`#my-board .tier-zone[data-tier="${tl.level}"]`);
         if (zone) {
-          activeIds.forEach((id, index) => {
-            const slot = document.createElement('div');
-            slot.className = 'slot-cell';
-            const num = document.createElement('span');
-            num.className = 'slot-number';
-            num.innerText = index + 1;
-            slot.appendChild(num);
-            zone.appendChild(slot);
-          });
+          if (isCategory) {
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              slot.appendChild(num);
+              zone.appendChild(slot);
+            });
+          }
 
           sortedData.filter(item => item.t === tl.level).forEach(item => {
             const img = createImgElement(item.id, true);
@@ -827,11 +832,12 @@
       const userSubmissions = getSubmissionsForMode(roomData[name], currentMode);
       if (!userSubmissions) return;
 
+      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
       const activeProds = getActiveProducts();
       const activeIds = activeProds.map(p => p.id);
 
       const friendItems = [...userSubmissions]
-        .filter(item => activeIds.includes(item.id))
+        .filter(item => !isCategory || activeIds.includes(item.id))
         .sort((a, b) => {
           if (a.t !== b.t) return a.t - b.t;
           return a.p - b.p;
@@ -841,15 +847,17 @@
         if (item.t > 0) {
           const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
           if (zone) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
-            });
+            if (isCategory) {
+              activeIds.forEach((id, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'slot-cell';
+                const num = document.createElement('span');
+                num.className = 'slot-number';
+                num.innerText = index + 1;
+                slot.appendChild(num);
+                zone.appendChild(slot);
+              });
+            }
 
             const img = createImgElement(item.id, false);
             if (img) zone.appendChild(img);
@@ -871,10 +879,13 @@
 
       if (allSubmissions.length === 0) return;
 
+      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
       const activeProds = getActiveProducts();
       const activeIds = activeProds.map(p => p.id);
       const stats = {};
-      activeProds.forEach(p => stats[p.id] = { id: p.id, starSum: 0, posSum: 0, count: 0 });
+      
+      const targetProds = isCategory ? activeProds : products;
+      targetProds.forEach(p => stats[p.id] = { id: p.id, starSum: 0, posSum: 0, count: 0 });
 
       allSubmissions.forEach(sub => {
         sub.forEach(item => {
@@ -919,15 +930,17 @@
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
         if (zone) {
-          activeIds.forEach((id, index) => {
-            const slot = document.createElement('div');
-            slot.className = 'slot-cell';
-            const num = document.createElement('span');
-            num.className = 'slot-number';
-            num.innerText = index + 1;
-            slot.appendChild(num);
-            zone.appendChild(slot);
-          });
+          if (isCategory) {
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              slot.appendChild(num);
+              zone.appendChild(slot);
+            });
+          }
 
           groupTiers[tLevel].forEach(item => {
             const img = createImgElement(item.id, false);
