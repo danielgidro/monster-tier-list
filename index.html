@@ -93,12 +93,9 @@
       top: 50%;
       transform: translateY(-50%) rotate(180deg);
       transition: transform 0.2s;
-      width: 10px;
-      height: 6px;
+      width: 14px;
+      height: 14px;
       display: inline-block;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-bottom: 6px solid currentColor;
     }
     .dropdown-container.open .dropdown-btn .arrow {
       transform: translateY(-50%) rotate(0deg);
@@ -307,7 +304,7 @@
     <button id="mode-5-btn" class="mode-btn active" onclick="switchMode(5)">⭐ 5 Star Mod</button>
     <button id="mode-10-btn" class="mode-btn" onclick="switchMode(10)">🌟 10 Star Mod</button>
     <div id="dropdown-container" class="dropdown-container">
-      <button id="dropdown-main-btn" class="dropdown-btn" onclick="toggleDropdown(event)">Categories <span class="arrow"></span></button>
+      <button id="dropdown-main-btn" class="dropdown-btn" onclick="toggleDropdown(event)">Categories <svg class="arrow" viewBox="0 0 24 24"><path d="M4 16L12 8L20 16" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
       <div id="dropdown-content" class="dropdown-content">
         <button class="sub-mode-btn" onclick="switchMode('energy')">Energy</button>
         <button class="sub-mode-btn" onclick="switchMode('ultra')">Ultra</button>
@@ -474,7 +471,7 @@
     }
 
     window.onclick = function(event) {
-      if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-content')) {
+      if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-content') && !event.target.closest('.dropdown-btn *')) {
         const dropdowns = document.getElementsByClassName("dropdown-content");
         for (let i = 0; i < dropdowns.length; i++) {
           const openDropdown = dropdowns[i];
@@ -497,10 +494,11 @@
       const isSub = typeof mode === 'string' && categoryNames[mode];
       dropdownBtn.classList.toggle('active', isSub);
       
+      const arrowSvg = '<svg class="arrow" viewBox="0 0 24 24"><path d="M4 16L12 8L20 16" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
       if (isSub) {
-        dropdownBtn.innerHTML = `${categoryNames[mode]} <span class="arrow"></span>`;
+        dropdownBtn.innerHTML = `${categoryNames[mode]} ${arrowSvg}`;
       } else {
-        dropdownBtn.innerHTML = `Categories <span class="arrow"></span>`;
+        dropdownBtn.innerHTML = `Categories ${arrowSvg}`;
       }
 
       document.querySelectorAll('.sub-mode-btn').forEach(btn => {
