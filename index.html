@@ -73,63 +73,6 @@
     }
     .mode-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
 
-    .dropdown-container {
-      position: relative;
-      flex: 1;
-      min-width: 100px;
-    }
-    .dropdown-btn {
-      width: 100%;
-      background: #222224; color: #8e8e93; border: 1px solid #3a3a3c; padding: 8px;
-      border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; text-align: center;
-      box-sizing: border-box;
-      position: relative;
-      padding-right: 28px;
-    }
-    .dropdown-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
-    .dropdown-btn .arrow {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%) rotate(180deg);
-      transition: transform 0.2s;
-      width: 14px;
-      height: 14px;
-      display: inline-block;
-    }
-    .dropdown-container.open .dropdown-btn .arrow {
-      transform: translateY(-50%) rotate(0deg);
-    }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #1c1c1e;
-      border: 1px solid #3a3a3c;
-      border-radius: 8px;
-      margin-top: 4px;
-      z-index: 100;
-      flex-direction: column;
-      gap: 2px;
-      padding: 4px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-    .dropdown-content.show { display: flex; }
-    .sub-mode-btn {
-      background: #2c2c2e;
-      color: #8e8e93;
-      border: none;
-      padding: 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 12px;
-      text-align: center;
-    }
-    .sub-mode-btn.active { background: #007aff; color: #fff; }
-
     .nav-tabs { display: flex; gap: 6px; margin-bottom: 10px; width: 100%; max-width: 800px; }
     .tab-btn {
       background: #2c2c2e; color: #8e8e93; border: none; padding: 8px 6px;
@@ -303,18 +246,13 @@
   <div class="mode-tabs">
     <button id="mode-5-btn" class="mode-btn active" onclick="switchMode(5)">⭐ 5 Star Mod</button>
     <button id="mode-10-btn" class="mode-btn" onclick="switchMode(10)">🌟 10 Star Mod</button>
-    <div id="dropdown-container" class="dropdown-container">
-      <button id="dropdown-main-btn" class="dropdown-btn" onclick="toggleDropdown(event)">Categories <svg class="arrow" viewBox="0 0 24 24"><path d="M4 16L12 8L20 16" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
-      <div id="dropdown-content" class="dropdown-content">
-        <button class="sub-mode-btn" onclick="switchMode('energy')">Energy</button>
-        <button class="sub-mode-btn" onclick="switchMode('ultra')">Ultra</button>
-        <button class="sub-mode-btn" onclick="switchMode('juiced')">Juiced</button>
-        <button class="sub-mode-btn" onclick="switchMode('rehab')">Rehab</button>
-        <button class="sub-mode-btn" onclick="switchMode('java')">Java</button>
-        <button class="sub-mode-btn" onclick="switchMode('nitro')">Nitro</button>
-        <button class="sub-mode-btn" onclick="switchMode('drivers')">Drivers</button>
-      </div>
-    </div>
+    <button class="mode-btn" onclick="switchMode('energy')">Energy</button>
+    <button class="mode-btn" onclick="switchMode('ultra')">Ultra</button>
+    <button class="mode-btn" onclick="switchMode('juiced')">Juiced</button>
+    <button class="mode-btn" onclick="switchMode('rehab')">Rehab</button>
+    <button class="mode-btn" onclick="switchMode('java')">Java</button>
+    <button class="mode-btn" onclick="switchMode('nitro')">Nitro</button>
+    <button class="mode-btn" onclick="switchMode('drivers')">Drivers</button>
   </div>
 
   <div class="nav-tabs">
@@ -464,25 +402,6 @@
       return products;
     }
 
-    function toggleDropdown(e) {
-      e.stopPropagation();
-      document.getElementById('dropdown-content').classList.toggle('show');
-      document.getElementById('dropdown-container').classList.toggle('open');
-    }
-
-    window.onclick = function(event) {
-      if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-content') && !event.target.closest('.dropdown-btn *')) {
-        const dropdowns = document.getElementsByClassName("dropdown-content");
-        for (let i = 0; i < dropdowns.length; i++) {
-          const openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains('show')) {
-            openDropdown.classList.remove('show');
-            document.getElementById('dropdown-container').classList.remove('open');
-          }
-        }
-      }
-    }
-
     function switchMode(mode) {
       currentMode = mode;
       selectedProductId = null;
@@ -490,26 +409,12 @@
       document.getElementById('mode-5-btn').classList.toggle('active', mode === 5);
       document.getElementById('mode-10-btn').classList.toggle('active', mode === 10);
       
-      const dropdownBtn = document.getElementById('dropdown-main-btn');
-      const isSub = typeof mode === 'string' && categoryNames[mode];
-      dropdownBtn.classList.toggle('active', isSub);
-      
-      const arrowSvg = '<svg class="arrow" viewBox="0 0 24 24"><path d="M4 16L12 8L20 16" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
-      if (isSub) {
-        dropdownBtn.innerHTML = `${categoryNames[mode]} ${arrowSvg}`;
-      } else {
-        dropdownBtn.innerHTML = `Categories ${arrowSvg}`;
-      }
-
-      document.querySelectorAll('.sub-mode-btn').forEach(btn => {
+      document.querySelectorAll('.mode-btn:not(#mode-5-btn):not(#mode-10-btn)').forEach(btn => {
         btn.classList.remove('active');
         if (btn.getAttribute('onclick').includes(mode)) {
           btn.classList.add('active');
         }
       });
-
-      document.getElementById('dropdown-content').classList.remove('show');
-      document.getElementById('dropdown-container').classList.remove('open');
 
       renderActiveTab();
     }
