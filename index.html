@@ -793,16 +793,14 @@
       getCurrentTierLevels().forEach(tl => {
         const zone = document.querySelector(`#my-board .tier-zone[data-tier="${tl.level}"]`);
         if (zone) {
-          if (isCategory) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              zone.appendChild(slot);
-            });
-          }
+          activeIds.forEach((id, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot-cell';
+            const num = document.createElement('span');
+            num.className = 'slot-number';
+            num.innerText = index + 1;
+            zone.appendChild(slot);
+          });
 
           sortedData.filter(item => item.t === tl.level).forEach(item => {
             const slots = zone.querySelectorAll('.slot-cell');
@@ -841,16 +839,14 @@
         if (item.t > 0) {
           const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
           if (zone) {
-            if (isCategory) {
-              activeIds.forEach((id, index) => {
-                const slot = document.createElement('div');
-                slot.className = 'slot-cell';
-                const num = document.createElement('span');
-                num.className = 'slot-number';
-                num.innerText = index + 1;
-                zone.appendChild(slot);
-              });
-            }
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              zone.appendChild(slot);
+            });
 
             const slots = zone.querySelectorAll('.slot-cell');
             const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
@@ -929,16 +925,14 @@
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
         if (zone) {
-          if (isCategory) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              zone.appendChild(slot);
-            });
-          }
+          activeIds.forEach((id, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot-cell';
+            const num = document.createElement('span');
+            num.className = 'slot-number';
+            num.innerText = index + 1;
+            zone.appendChild(slot);
+          });
 
           groupTiers[tLevel].forEach(item => {
             const slots = zone.querySelectorAll('.slot-cell');
