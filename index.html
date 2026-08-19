@@ -773,13 +773,12 @@
       const unassignedZone = document.querySelector('.unassigned-zone');
       unassignedZone.innerHTML = '';
 
-      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
       const activeProds = getActiveProducts();
       const activeIds = activeProds.map(p => p.id);
       const currentList = myData[currentMode];
       
       const sortedData = [...currentList]
-        .filter(item => !isCategory || activeIds.includes(item.id))
+        .filter(item => activeIds.includes(item.id))
         .sort((a, b) => {
           if (a.t !== b.t) return a.t - b.t;
           return a.p - b.p;
@@ -824,30 +823,29 @@
       const userSubmissions = getSubmissionsForMode(roomData[name], currentMode);
       if (!userSubmissions) return;
 
-      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
       const activeProds = getActiveProducts();
       const activeIds = activeProds.map(p => p.id);
 
       const friendItems = [...userSubmissions]
-        .filter(item => !isCategory || activeIds.includes(item.id))
+        .filter(item => activeIds.includes(item.id))
         .sort((a, b) => {
           if (a.t !== b.t) return a.t - b.t;
           return a.p - b.p;
         });
 
-      friendItems.forEach(item => {
-        if (item.t > 0) {
-          const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
-          if (zone) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              zone.appendChild(slot);
-            });
+      getCurrentTierLevels().forEach(tl => {
+        const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${tl.level}"]`);
+        if (zone) {
+          activeIds.forEach((id, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot-cell';
+            const num = document.createElement('span');
+            num.className = 'slot-number';
+            num.innerText = index + 1;
+            zone.appendChild(slot);
+          });
 
+          friendItems.filter(item => item.t === tl.level).forEach(item => {
             const slots = zone.querySelectorAll('.slot-cell');
             const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
             const img = createImgElement(item.id, false);
@@ -856,7 +854,7 @@
             } else if (img) {
               zone.appendChild(img);
             }
-          }
+          });
         }
       });
     }
@@ -925,14 +923,16 @@
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
         if (zone) {
-          activeIds.forEach((id, index) => {
-            const slot = document.createElement('div');
-            slot.className = 'slot-cell';
-            const num = document.createElement('span');
-            num.className = 'slot-number';
-            num.innerText = index + 1;
-            zone.appendChild(slot);
-          });
+          if (isCategory) {
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              zone.appendChild(slot);
+            });
+          }
 
           groupTiers[tLevel].forEach(item => {
             const slots = zone.querySelectorAll('.slot-cell');
