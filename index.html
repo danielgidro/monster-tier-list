@@ -402,8 +402,12 @@
       <div class="counter-form">
         <select id="counter-drink-select" class="counter-select"></select>
         <input type="datetime-local" id="counter-time-input" class="counter-input">
-        <button class="counter-btn" onclick="startCounter()">Start Timer</button>
+        <div style="display: flex; gap: 6px;">
+          <input type="number" id="counter-amount-input" class="counter-input" value="1" min="1" placeholder="Amount" style="width: 80px;">
+          <button class="counter-btn" onclick="startCounter()">Start Timer & Log</button>
+        </div>
       </div>
+      <div style="font-weight: bold; font-size: 13px; align-self: flex-start; margin-top: 5px; color: #8e8e93;">Total Drunk Count: <span id="total-drink-count" style="color: var(--accent);">0</span></div>
       <div id="history-list" class="history-list"></div>
     </div>
   </div>
@@ -1106,13 +1110,14 @@
     function startCounter() {
       const drink = document.getElementById('counter-drink-select').value;
       const timeVal = document.getElementById('counter-time-input').value;
+      const amount = parseInt(document.getElementById('counter-amount-input').value, 10) || 1;
       if (!timeVal) return;
 
       const targetTime = new Date(timeVal).getTime();
       if (activeTimer) clearInterval(activeTimer);
 
       const history = JSON.parse(localStorage.getItem('monster_history') || '[]');
-      history.unshift({ drink, time: targetTime });
+      history.unshift({ drink, time: targetTime, amount });
       localStorage.setItem('monster_history', JSON.stringify(history));
 
       activeTimer = setInterval(() => {
@@ -1138,13 +1143,20 @@
       const historyList = document.getElementById('history-list');
       const history = JSON.parse(localStorage.getItem('monster_history') || '[]');
       historyList.innerHTML = '';
+      
+      let totalCount = 0;
       history.forEach(item => {
+        const amt = item.amount || 1;
+        totalCount += amt;
+
         const div = document.createElement('div');
         div.className = 'history-item';
         const dateStr = new Date(item.time).toLocaleString();
-        div.innerHTML = `<span><b>${item.drink}</b></span><span style="color:#8e8e93;">${dateStr}</span>`;
+        div.innerHTML = `<span><b>${item.drink}</b> <span style="color: var(--accent);">(x${amt})</span></span><span style="color:#8e8e93;">${dateStr}</span>`;
         historyList.appendChild(div);
       });
+
+      document.getElementById('total-drink-count').innerText = totalCount;
     }
 
     function switchTab(tabId, btn) {
