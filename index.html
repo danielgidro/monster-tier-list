@@ -841,23 +841,27 @@
       getCurrentTierLevels().forEach(tl => {
         const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${tl.level}"]`);
         if (zone) {
-          if (isCategory) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
-            });
-          }
+          // Ha nem kategória mód van, de még üres a friend táblája, akkor is felépíthetjük a slotokat, 
+          // vagy kategória módban alapból az összes aktív termékhez. 
+          // Hogy mindig látszódjanak a slotok, létrehozzuk az összes aktív ID-hoz vagy az összes itemhez.
+          const itemsToDisplay = isCategory ? activeIds : activeProds.map(p => p.id);
+
+          itemsToDisplay.forEach((id, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot-cell';
+            const num = document.createElement('span');
+            num.className = 'slot-number';
+            num.innerText = index + 1;
+            slot.appendChild(num);
+            zone.appendChild(slot);
+          });
 
           friendItems.filter(item => item.t === tl.level).forEach(item => {
             const slots = zone.querySelectorAll('.slot-cell');
             const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
             const img = createImgElement(item.id, false);
             if (emptySlot && img) {
+              emptySlot.innerHTML = ''; // Töröljük a számot/üres cellát, helyette berakjuk a képet (vagy megtartjuk, de a tier-img kitakarja)
               emptySlot.appendChild(img);
             } else if (img) {
               zone.appendChild(img);
