@@ -349,37 +349,37 @@
     const db = firebase.database();
 
     const products = [
-      { id: '1',  name: 'Aussie Lemonade',         img: 'Aussie Lemonade.png' },
-      { id: '2',  name: 'Bad Apple',               img: 'Bad Apple.png' },
-      { id: '3',  name: 'Energy Zero Sugar',       img: 'Energy Zero Sugar.png' },
-      { id: '4',  name: 'Energy',                  img: 'Energy.png' },
-      { id: '5',  name: 'Full Throttle',           img: 'Full Throttle.png' },
-      { id: '6',  name: 'Khaotic',                 img: 'Khaotic.png' },
-      { id: '7',  name: 'Lando Norris',            img: 'Lando Norris.png' },
-      { id: '8',  name: 'Mango Loco',              img: 'Mango Loco.png' },
-      { id: '9',  name: 'Monarch',                 img: 'Monarch.png' },
-      { id: '10', name: 'Nitro Cosmic Peach',      img: 'Nitro Cosmic Peach.png' },
-      { id: '11', name: 'Nitro Super Dry',         img: 'Nitro Super Dry.png' },
-      { id: '12', name: 'Pacific Punch',           img: 'Pacific Punch.png' },
-      { id: '13', name: 'Pipeline Punch',          img: 'Pipeline Punch.png' },
-      { id: '14', name: 'Rehab Lemonade Tea',      img: 'Rehab Lemonade Tea.png' },
-      { id: '15', name: 'Rehab Peach Tea',         img: 'Rehab Peach Tea.png' },
-      { id: '16', name: 'Rio Punch',               img: 'Rio Punch.png' },
-      { id: '17', name: 'Ultra Black',             img: 'Ultra Black.png' },
-      { id: '18', name: 'Ultra Fantasy Ruby Red',  img: 'Ultra Fantasy Ruby Red.png' },
-      { id: '19', name: 'Ultra Fiesta Mango',      img: 'Ultra Fiesta Mango.png' },
-      { id: '20', name: 'Ultra Golden Pineapple',  img: 'Ultra Golden Pineapple.png' },
-      { id: '21', name: 'Ultra Paradise',          img: 'Ultra Paradise.png' },
-      { id: '22', name: 'Ultra Peachy Keen',       img: 'Ultra Peachy Keen.png' },
-      { id: '23', name: 'Ultra Rosa',              img: 'Ultra Rosa.png' },
-      { id: '24', name: 'Ultra Strawberry Dreams', img: 'Ultra Strawberry Dreams.png' },
-      { id: '25', name: 'Ultra Vice Guava',        img: 'Ultra Vice Guava.png' },
-      { id: '26', name: 'Ultra Violet',            img: 'Ultra Violet.png' },
-      { id: '27', name: 'Ultra Watermelon',        img: 'Ultra Watermelon.png' },
-      { id: '28', name: 'Ultra Zero',              img: 'Ultra Zero.png' },
-      { id: '29', name: 'Viking Berry',            img: 'Viking Berry.png' },
-      { id: '30', name: 'VR46 Doctor',             img: 'VR46 Doctor.png' },
-      { id: '31', name: 'VR46 Zero',               img: 'VR46 Zero.png' }
+      { id: '1',  name: 'Aussie Lemonade',         img: 'Aussie Lemonade.png',         category: 'sub3' },
+      { id: '2',  name: 'Bad Apple',               img: 'Bad Apple.png',               category: 'sub3' },
+      { id: '3',  name: 'Energy Zero Sugar',       img: 'Energy Zero Sugar.png',       category: 'sub1' },
+      { id: '4',  name: 'Energy',                  img: 'Energy.png',                  category: 'sub1' },
+      { id: '5',  name: 'Full Throttle',           img: 'Full Throttle.png',           category: 'sub1' },
+      { id: '6',  name: 'Khaotic',                 img: 'Khaotic.png',                 category: 'sub3' },
+      { id: '7',  name: 'Lando Norris',            img: 'Lando Norris.png',            category: 'sub1' },
+      { id: '8',  name: 'Mango Loco',              img: 'Mango Loco.png',              category: 'sub3' },
+      { id: '9',  name: 'Monarch',                 img: 'Monarch.png',                 category: 'sub3' },
+      { id: '10', name: 'Nitro Cosmic Peach',      img: 'Nitro Cosmic Peach.png',      category: 'sub6' },
+      { id: '11', name: 'Nitro Super Dry',         img: 'Nitro Super Dry.png',         category: 'sub6' },
+      { id: '12', name: 'Pacific Punch',           img: 'Pacific Punch.png',           category: 'sub3' },
+      { id: '13', name: 'Pipeline Punch',          img: 'Pipeline Punch.png',          category: 'sub3' },
+      { id: '14', name: 'Rehab Lemonade Tea',      img: 'Rehab Lemonade Tea.png',      category: 'sub4' },
+      { id: '15', name: 'Rehab Peach Tea',         img: 'Rehab Peach Tea.png',         category: 'sub4' },
+      { id: '16', name: 'Rio Punch',               img: 'Rio Punch.png',               category: 'sub3' },
+      { id: '17', name: 'Ultra Black',             img: 'Ultra Black.png',             category: 'sub2' },
+      { id: '18', name: 'Ultra Fantasy Ruby Red',  img: 'Ultra Fantasy Ruby Red.png',  category: 'sub2' },
+      { id: '19', name: 'Ultra Fiesta Mango',      img: 'Ultra Fiesta Mango.png',      category: 'sub2' },
+      { id: '20', name: 'Ultra Golden Pineapple',  img: 'Ultra Golden Pineapple.png',  category: 'sub2' },
+      { id: '21', name: 'Ultra Paradise',          img: 'Ultra Paradise.png',          category: 'sub2' },
+      { id: '22', name: 'Ultra Peachy Keen',       img: 'Ultra Peachy Keen.png',       category: 'sub2' },
+      { id: '23', name: 'Ultra Rosa',              img: 'Ultra Rosa.png',              category: 'sub2' },
+      { id: '24', name: 'Ultra Strawberry Dreams', img: 'Ultra Strawberry Dreams.png', category: 'sub2' },
+      { id: '25', name: 'Ultra Vice Guava',        img: 'Ultra Vice Guava.png',        category: 'sub2' },
+      { id: '26', name: 'Ultra Violet',            img: 'Ultra Violet.png',            category: 'sub2' },
+      { id: '27', name: 'Ultra Watermelon',        img: 'Ultra Watermelon.png',        category: 'sub2' },
+      { id: '28', name: 'Ultra Zero',              img: 'Ultra Zero.png',              category: 'sub2' },
+      { id: '29', name: 'Viking Berry',            img: 'Viking Berry.png',            category: 'sub1' },
+      { id: '30', name: 'VR46 Doctor',             img: 'VR46 Doctor.png',             category: 'sub1' },
+      { id: '31', name: 'VR46 Zero',               img: 'VR46 Zero.png',               category: 'sub1' }
     ];
 
     let currentMode = 5;
@@ -430,6 +430,13 @@
       return tierLevels3;
     }
 
+    function getActiveProducts() {
+      if (typeof currentMode === 'string' && currentMode.startsWith('sub')) {
+        return products.filter(p => p.category === currentMode);
+      }
+      return products;
+    }
+
     function toggleDropdown(e) {
       e.stopPropagation();
       document.getElementById('dropdown-content').classList.toggle('show');
@@ -457,10 +464,12 @@
       const dropdownBtn = document.getElementById('dropdown-main-btn');
       const isSub = typeof mode === 'string' && mode.startsWith('sub');
       dropdownBtn.classList.toggle('active', isSub);
+      
       if (isSub) {
-        dropdownBtn.innerText = `📂 ${mode.replace('sub', '')}`;
+        const activeSubBtn = document.querySelector(`.sub-mode-btn[onclick*="${mode}"]`);
+        dropdownBtn.innerText = `📂 ${activeSubBtn ? activeSubBtn.innerText : mode}`;
       } else {
-        dropdownBtn.innerText = `📂 More`;
+        dropdownBtn.innerText = `Categories`;
       }
 
       document.querySelectorAll('.sub-mode-btn').forEach(btn => {
@@ -570,11 +579,16 @@
 
     function updatePositions(mode) {
       const list = myData[mode];
+      const activeProds = (typeof mode === 'string' && mode.startsWith('sub')) 
+        ? products.filter(p => p.category === mode) 
+        : products;
+      const activeIds = activeProds.map(p => p.id);
+
       const maxTier = mode === 5 ? 5 : (mode === 10 ? 10 : 3);
       for (let tier = 0; tier <= maxTier; tier++) {
         let pos = 1;
         list.forEach(item => {
-          if (item.t === tier) {
+          if (activeIds.includes(item.id) && item.t === tier) {
             item.p = tier === 0 ? 0 : pos++;
           }
         });
@@ -583,6 +597,7 @@
 
     function createImgElement(productId, isInteractive = false) {
       const prod = products.find(p => p.id === productId);
+      if (!prod) return null;
       const img = document.createElement('img');
       img.src = prod.img; 
       img.className = 'tier-img'; 
@@ -713,15 +728,20 @@
       const unassignedZone = document.querySelector('.unassigned-zone');
       unassignedZone.innerHTML = '';
 
+      const activeProds = getActiveProducts();
+      const activeIds = activeProds.map(p => p.id);
       const currentList = myData[currentMode];
-      const sortedData = [...currentList].sort((a, b) => {
-        if (a.t !== b.t) return a.t - b.t;
-        return a.p - b.p;
-      });
+      
+      const sortedData = [...currentList]
+        .filter(item => activeIds.includes(item.id))
+        .sort((a, b) => {
+          if (a.t !== b.t) return a.t - b.t;
+          return a.p - b.p;
+        });
 
       sortedData.filter(item => item.t === 0).forEach(item => {
         const img = createImgElement(item.id, true);
-        unassignedZone.appendChild(img);
+        if (img) unassignedZone.appendChild(img);
       });
 
       getCurrentTierLevels().forEach(tl => {
@@ -729,7 +749,7 @@
         if (zone) {
           sortedData.filter(item => item.t === tl.level).forEach(item => {
             const img = createImgElement(item.id, true);
-            zone.appendChild(img);
+            if (img) zone.appendChild(img);
           });
         }
       });
@@ -743,15 +763,23 @@
       const userSubmissions = getSubmissionsForMode(roomData[name], currentMode);
       if (!userSubmissions) return;
 
-      const friendItems = [...userSubmissions].sort((a, b) => {
-        if (a.t !== b.t) return a.t - b.t;
-        return a.p - b.p;
-      });
+      const activeProds = getActiveProducts();
+      const activeIds = activeProds.map(p => p.id);
+
+      const friendItems = [...userSubmissions]
+        .filter(item => activeIds.includes(item.id))
+        .sort((a, b) => {
+          if (a.t !== b.t) return a.t - b.t;
+          return a.p - b.p;
+        });
 
       friendItems.forEach(item => {
         if (item.t > 0) {
           const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
-          if (zone) zone.appendChild(createImgElement(item.id, false));
+          if (zone) {
+            const img = createImgElement(item.id, false);
+            if (img) zone.appendChild(img);
+          }
         }
       });
     }
@@ -769,12 +797,13 @@
 
       if (allSubmissions.length === 0) return;
 
+      const activeProds = getActiveProducts();
       const stats = {};
-      products.forEach(p => stats[p.id] = { id: p.id, starSum: 0, posSum: 0, count: 0 });
+      activeProds.forEach(p => stats[p.id] = { id: p.id, starSum: 0, posSum: 0, count: 0 });
 
       allSubmissions.forEach(sub => {
         sub.forEach(item => {
-          if (item.t > 0) {
+          if (stats[item.id] && item.t > 0) {
             stats[item.id].starSum += item.t;
             stats[item.id].posSum += item.p;
             stats[item.id].count += 1;
@@ -817,7 +846,10 @@
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
         if (zone) {
-          groupTiers[tLevel].forEach(item => zone.appendChild(createImgElement(item.id, false)));
+          groupTiers[tLevel].forEach(item => {
+            const img = createImgElement(item.id, false);
+            if (img) zone.appendChild(img);
+          });
         }
       });
 
@@ -847,8 +879,10 @@
           col.className = 'podium-column';
 
           const img = createImgElement(item.id, false);
-          img.className = 'tier-img podium-img';
-          col.appendChild(img);
+          if (img) {
+            img.className = 'tier-img podium-img';
+            col.appendChild(img);
+          }
 
           const step = document.createElement('div');
           step.className = `podium-step step-${rank}`;
