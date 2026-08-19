@@ -785,27 +785,9 @@
           return a.p - b.p;
         });
 
-      if (isCategory) {
-        activeIds.forEach((id, index) => {
-          const slot = document.createElement('div');
-          slot.className = 'slot-cell';
-          const num = document.createElement('span');
-          num.className = 'slot-number';
-          num.innerText = index + 1;
-          slot.appendChild(num);
-          unassignedZone.appendChild(slot);
-        });
-      }
-
       sortedData.filter(item => item.t === 0).forEach(item => {
-        const unassignedSlots = unassignedZone.querySelectorAll('.slot-cell');
-        const emptySlot = Array.from(unassignedSlots).find(slot => !slot.querySelector('.tier-img'));
         const img = createImgElement(item.id, true);
-        if (emptySlot && img) {
-          emptySlot.appendChild(img);
-        } else if (img) {
-          unassignedZone.appendChild(img);
-        }
+        if (img) unassignedZone.appendChild(img);
       });
 
       getCurrentTierLevels().forEach(tl => {
