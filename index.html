@@ -23,6 +23,10 @@
       --tier-10-2: #2c2c2e; 
       --tier-10-1: #ffffff;
 
+      --tier-3-3: #ff3b30;
+      --tier-3-2: #ffcc00;
+      --tier-3-1: #007aff;
+
       --bg-dark: #121212;
       --surface: #1c1c1e; 
       --accent: #30d158;
@@ -61,12 +65,55 @@
       background: var(--danger); color: #fff; flex: 1;
     }
 
-    .mode-tabs { display: flex; gap: 6px; margin-bottom: 8px; width: 100%; max-width: 800px; }
+    .mode-tabs { display: flex; gap: 6px; margin-bottom: 8px; width: 100%; max-width: 800px; flex-wrap: wrap; }
     .mode-btn {
       background: #222224; color: #8e8e93; border: 1px solid #3a3a3c; padding: 8px;
       border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; flex: 1; text-align: center;
+      min-width: 100px;
     }
     .mode-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
+
+    .dropdown-container {
+      position: relative;
+      flex: 1;
+      min-width: 100px;
+    }
+    .dropdown-btn {
+      width: 100%;
+      background: #222224; color: #8e8e93; border: 1px solid #3a3a3c; padding: 8px;
+      border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; text-align: center;
+      box-sizing: border-box;
+    }
+    .dropdown-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1c1c1e;
+      border: 1px solid #3a3a3c;
+      border-radius: 8px;
+      margin-top: 4px;
+      z-index: 100;
+      flex-direction: column;
+      gap: 2px;
+      padding: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .dropdown-content.show { display: flex; }
+    .sub-mode-btn {
+      background: #2c2c2e;
+      color: #8e8e93;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+      text-align: center;
+    }
+    .sub-mode-btn.active { background: #007aff; color: #fff; }
 
     .nav-tabs { display: flex; gap: 6px; margin-bottom: 10px; width: 100%; max-width: 800px; }
     .tab-btn {
@@ -101,6 +148,10 @@
     .badge-10-3  { background: var(--tier-10-3); color: #000; }
     .badge-10-2  { background: var(--tier-10-2); color: #fff; }
     .badge-10-1  { background: var(--tier-10-1); color: #000; }
+
+    .badge-3-3 { background: var(--tier-3-3); }
+    .badge-3-2 { background: var(--tier-3-2); }
+    .badge-3-1 { background: var(--tier-3-1); }
 
     .tier-zone { 
       flex: 1; display: flex; flex-direction: row; 
@@ -237,6 +288,17 @@
   <div class="mode-tabs">
     <button id="mode-5-btn" class="mode-btn active" onclick="switchMode(5)">⭐ 5 Star Mod</button>
     <button id="mode-10-btn" class="mode-btn" onclick="switchMode(10)">🌟 10 Star Mod</button>
+    <div class="dropdown-container">
+      <button id="dropdown-main-btn" class="dropdown-btn" onclick="toggleDropdown(event)">📂 More</button>
+      <div id="dropdown-content" class="dropdown-content">
+        <button class="sub-mode-btn" onclick="switchMode('sub1')">1</button>
+        <button class="sub-mode-btn" onclick="switchMode('sub2')">2</button>
+        <button class="sub-mode-btn" onclick="switchMode('sub3')">3</button>
+        <button class="sub-mode-btn" onclick="switchMode('sub4')">4</button>
+        <button class="sub-mode-btn" onclick="switchMode('sub5')">5</button>
+        <button class="sub-mode-btn" onclick="switchMode('sub6')">6</button>
+      </div>
+    </div>
   </div>
 
   <div class="nav-tabs">
@@ -287,37 +349,37 @@
     const db = firebase.database();
 
     const products = [
-      { id: '1',  name: 'Aussie Lemonade',          img: 'Aussie Lemonade.png' },
-      { id: '2',  name: 'Bad Apple',                img: 'Bad Apple.png' },
-      { id: '3',  name: 'Energy Zero Sugar',        img: 'Energy Zero Sugar.png' },
-      { id: '4',  name: 'Energy',                   img: 'Energy.png' },
-      { id: '5',  name: 'Full Throttle',            img: 'Full Throttle.png' },
-      { id: '6',  name: 'Khaotic',                  img: 'Khaotic.png' },
-      { id: '7',  name: 'Lando Norris',             img: 'Lando Norris.png' },
-      { id: '8',  name: 'Mango Loco',               img: 'Mango Loco.png' },
-      { id: '9',  name: 'Monarch',                  img: 'Monarch.png' },
-      { id: '10', name: 'Nitro Cosmic Peach',       img: 'Nitro Cosmic Peach.png' },
-      { id: '11', name: 'Nitro Super Dry',          img: 'Nitro Super Dry.png' },
-      { id: '12', name: 'Pacific Punch',            img: 'Pacific Punch.png' },
-      { id: '13', name: 'Pipeline Punch',           img: 'Pipeline Punch.png' },
-      { id: '14', name: 'Rehab Lemonade Tea',       img: 'Rehab Lemonade Tea.png' },
-      { id: '15', name: 'Rehab Peach Tea',          img: 'Rehab Peach Tea.png' },
-      { id: '16', name: 'Rio Punch',                img: 'Rio Punch.png' },
-      { id: '17', name: 'Ultra Black',              img: 'Ultra Black.png' },
-      { id: '18', name: 'Ultra Fantasy Ruby Red',   img: 'Ultra Fantasy Ruby Red.png' },
-      { id: '19', name: 'Ultra Fiesta Mango',       img: 'Ultra Fiesta Mango.png' },
-      { id: '20', name: 'Ultra Golden Pineapple',   img: 'Ultra Golden Pineapple.png' },
-      { id: '21', name: 'Ultra Paradise',           img: 'Ultra Paradise.png' },
-      { id: '22', name: 'Ultra Peachy Keen',        img: 'Ultra Peachy Keen.png' },
-      { id: '23', name: 'Ultra Rosa',               img: 'Ultra Rosa.png' },
-      { id: '24', name: 'Ultra Strawberry Dreams',  img: 'Ultra Strawberry Dreams.png' },
-      { id: '25', name: 'Ultra Vice Guava',         img: 'Ultra Vice Guava.png' },
-      { id: '26', name: 'Ultra Violet',             img: 'Ultra Violet.png' },
-      { id: '27', name: 'Ultra Watermelon',         img: 'Ultra Watermelon.png' },
-      { id: '28', name: 'Ultra Zero',               img: 'Ultra Zero.png' },
-      { id: '29', name: 'Viking Berry',             img: 'Viking Berry.png' },
-      { id: '30', name: 'VR46 Doctor',              img: 'VR46 Doctor.png' },
-      { id: '31', name: 'VR46 Zero',                img: 'VR46 Zero.png' }
+      { id: '1',  name: 'Aussie Lemonade',         img: 'Aussie Lemonade.png' },
+      { id: '2',  name: 'Bad Apple',               img: 'Bad Apple.png' },
+      { id: '3',  name: 'Energy Zero Sugar',       img: 'Energy Zero Sugar.png' },
+      { id: '4',  name: 'Energy',                  img: 'Energy.png' },
+      { id: '5',  name: 'Full Throttle',           img: 'Full Throttle.png' },
+      { id: '6',  name: 'Khaotic',                 img: 'Khaotic.png' },
+      { id: '7',  name: 'Lando Norris',            img: 'Lando Norris.png' },
+      { id: '8',  name: 'Mango Loco',              img: 'Mango Loco.png' },
+      { id: '9',  name: 'Monarch',                 img: 'Monarch.png' },
+      { id: '10', name: 'Nitro Cosmic Peach',      img: 'Nitro Cosmic Peach.png' },
+      { id: '11', name: 'Nitro Super Dry',         img: 'Nitro Super Dry.png' },
+      { id: '12', name: 'Pacific Punch',           img: 'Pacific Punch.png' },
+      { id: '13', name: 'Pipeline Punch',          img: 'Pipeline Punch.png' },
+      { id: '14', name: 'Rehab Lemonade Tea',      img: 'Rehab Lemonade Tea.png' },
+      { id: '15', name: 'Rehab Peach Tea',         img: 'Rehab Peach Tea.png' },
+      { id: '16', name: 'Rio Punch',               img: 'Rio Punch.png' },
+      { id: '17', name: 'Ultra Black',             img: 'Ultra Black.png' },
+      { id: '18', name: 'Ultra Fantasy Ruby Red',  img: 'Ultra Fantasy Ruby Red.png' },
+      { id: '19', name: 'Ultra Fiesta Mango',      img: 'Ultra Fiesta Mango.png' },
+      { id: '20', name: 'Ultra Golden Pineapple',  img: 'Ultra Golden Pineapple.png' },
+      { id: '21', name: 'Ultra Paradise',          img: 'Ultra Paradise.png' },
+      { id: '22', name: 'Ultra Peachy Keen',       img: 'Ultra Peachy Keen.png' },
+      { id: '23', name: 'Ultra Rosa',              img: 'Ultra Rosa.png' },
+      { id: '24', name: 'Ultra Strawberry Dreams', img: 'Ultra Strawberry Dreams.png' },
+      { id: '25', name: 'Ultra Vice Guava',        img: 'Ultra Vice Guava.png' },
+      { id: '26', name: 'Ultra Violet',            img: 'Ultra Violet.png' },
+      { id: '27', name: 'Ultra Watermelon',        img: 'Ultra Watermelon.png' },
+      { id: '28', name: 'Ultra Zero',              img: 'Ultra Zero.png' },
+      { id: '29', name: 'Viking Berry',            img: 'Viking Berry.png' },
+      { id: '30', name: 'VR46 Doctor',             img: 'VR46 Doctor.png' },
+      { id: '31', name: 'VR46 Zero',               img: 'VR46 Zero.png' }
     ];
 
     let currentMode = 5;
@@ -325,7 +387,13 @@
     let currentConnectionRef = null; 
     let myData = {
       5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-      10: products.map(p => ({ id: p.id, t: 0, p: 0 }))
+      10: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      sub1: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      sub2: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      sub3: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      sub4: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      sub5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      sub6: products.map(p => ({ id: p.id, t: 0, p: 0 }))
     };
     let selectedProductId = null; 
 
@@ -350,8 +418,33 @@
       { level: 1,  label: '1★',  class: 'badge-10-1' }
     ];
 
+    const tierLevels3 = [
+      { level: 3, label: '3★', class: 'badge-3-3' },
+      { level: 2, label: '2★', class: 'badge-3-2' },
+      { level: 1, label: '1★', class: 'badge-3-1' }
+    ];
+
     function getCurrentTierLevels() {
-      return currentMode === 5 ? tierLevels5 : tierLevels10;
+      if (currentMode === 5) return tierLevels5;
+      if (currentMode === 10) return tierLevels10;
+      return tierLevels3;
+    }
+
+    function toggleDropdown(e) {
+      e.stopPropagation();
+      document.getElementById('dropdown-content').classList.toggle('show');
+    }
+
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-content')) {
+        const dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+          const openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
     }
 
     function switchMode(mode) {
@@ -360,6 +453,24 @@
       
       document.getElementById('mode-5-btn').classList.toggle('active', mode === 5);
       document.getElementById('mode-10-btn').classList.toggle('active', mode === 10);
+      
+      const dropdownBtn = document.getElementById('dropdown-main-btn');
+      const isSub = typeof mode === 'string' && mode.startsWith('sub');
+      dropdownBtn.classList.toggle('active', isSub);
+      if (isSub) {
+        dropdownBtn.innerText = `📂 ${mode.replace('sub', '')}`;
+      } else {
+        dropdownBtn.innerText = `📂 More`;
+      }
+
+      document.querySelectorAll('.sub-mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick').includes(mode)) {
+          btn.classList.add('active');
+        }
+      });
+
+      document.getElementById('dropdown-content').classList.remove('show');
 
       renderActiveTab();
     }
@@ -459,7 +570,7 @@
 
     function updatePositions(mode) {
       const list = myData[mode];
-      const maxTier = mode === 5 ? 5 : 10;
+      const maxTier = mode === 5 ? 5 : (mode === 10 ? 10 : 3);
       for (let tier = 0; tier <= maxTier; tier++) {
         let pos = 1;
         list.forEach(item => {
@@ -506,12 +617,12 @@
           const remoteData = roomData[userName];
           if (Array.isArray(remoteData)) {
             myData[5] = remoteData;
-          } else if (remoteData['5'] || remoteData['10']) {
-            if (remoteData['5']) myData[5] = remoteData['5'];
-            if (remoteData['10']) myData[10] = remoteData['10'];
+          } else if (remoteData) {
+            ['5', '10', 'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6'].forEach(m => {
+              if (remoteData[m]) myData[m] = remoteData[m];
+            });
           }
-          updatePositions(5);
-          updatePositions(10);
+          ['5', '10', 'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6'].forEach(m => updatePositions(m));
         }
 
         updateFriendDropdown();
@@ -535,7 +646,13 @@
       selectedProductId = null;
       myData = {
         5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-        10: products.map(p => ({ id: p.id, t: 0, p: 0 }))
+        10: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+        sub1: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+        sub2: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+        sub3: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+        sub4: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+        sub5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+        sub6: products.map(p => ({ id: p.id, t: 0, p: 0 }))
       };
       
       renderActiveTab();
@@ -551,7 +668,13 @@
 
       db.ref(`rooms/${room}/${userName}`).set({
         '5': myData[5],
-        '10': myData[10]
+        '10': myData[10],
+        'sub1': myData['sub1'],
+        'sub2': myData['sub2'],
+        'sub3': myData['sub3'],
+        'sub4': myData['sub4'],
+        'sub5': myData['sub5'],
+        'sub6': myData['sub6']
       });
     }
 
@@ -668,14 +791,13 @@
       levels.forEach(tl => groupTiers[tl.level] = []);
 
       processed.forEach(i => {
-        let assigned = false;
         if (currentMode === 5) {
           if (i.avgStars >= 4.5) groupTiers[5].push(i);
           else if (i.avgStars >= 3.5) groupTiers[4].push(i);
           else if (i.avgStars >= 2.5) groupTiers[3].push(i);
           else if (i.avgStars >= 1.5) groupTiers[2].push(i);
           else groupTiers[1].push(i);
-        } else {
+        } else if (currentMode === 10) {
           let rounded = Math.round(i.avgStars);
           if (rounded < 1) rounded = 1;
           if (rounded > 10) rounded = 10;
@@ -684,6 +806,10 @@
           } else {
             groupTiers[1].push(i);
           }
+        } else {
+          if (i.avgStars >= 2.5) groupTiers[3].push(i);
+          else if (i.avgStars >= 1.5) groupTiers[2].push(i);
+          else groupTiers[1].push(i);
         }
       });
 
