@@ -838,22 +838,22 @@
           return a.p - b.p;
         });
 
-      friendItems.forEach(item => {
-        if (item.t > 0) {
-          const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
-          if (zone) {
-            if (isCategory) {
-              activeIds.forEach((id, index) => {
-                const slot = document.createElement('div');
-                slot.className = 'slot-cell';
-                const num = document.createElement('span');
-                num.className = 'slot-number';
-                num.innerText = index + 1;
-                slot.appendChild(num);
-                zone.appendChild(slot);
-              });
-            }
+      getCurrentTierLevels().forEach(tl => {
+        const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${tl.level}"]`);
+        if (zone) {
+          if (isCategory) {
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              slot.appendChild(num);
+              zone.appendChild(slot);
+            });
+          }
 
+          friendItems.filter(item => item.t === tl.level).forEach(item => {
             const slots = zone.querySelectorAll('.slot-cell');
             const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
             const img = createImgElement(item.id, false);
@@ -862,7 +862,7 @@
             } else if (img) {
               zone.appendChild(img);
             }
-          }
+          });
         }
       });
     }
