@@ -23,6 +23,10 @@
       --tier-10-2: #2c2c2e; 
       --tier-10-1: #ffffff;
 
+      --tier-3-3: #ff3b30;
+      --tier-3-2: #ff9500;
+      --tier-3-1: #ffcc00;
+
       --bg-dark: #121212;
       --surface: #1c1c1e; 
       --accent: #30d158;
@@ -137,7 +141,7 @@
     .tab-content.active { display: block; }
 
     .tier-board { display: flex; flex-direction: column; gap: 4px; background: #000; padding: 4px; border-radius: 8px; width: 100%; box-sizing: border-box; }
-    .tier-row { display: flex; background: var(--surface); min-height: 58px; border-radius: 6px; overflow: hidden; align-items: stretch; }
+    .tier-row { display: flex; background: var(--surface); min-height: 45px; border-radius: 6px; overflow: hidden; }
     .tier-badge {
       width: 42px; display: flex; align-items: center; justify-content: center;
       font-weight: 800; font-size: 13px; color: #000; flex-shrink: 0;
@@ -160,36 +164,18 @@
     .badge-10-2  { background: var(--tier-10-2); color: #fff; }
     .badge-10-1  { background: var(--tier-10-1); color: #000; }
 
+    .badge-3-3 { background: var(--tier-3-3); }
+    .badge-3-2 { background: var(--tier-3-2); }
+    .badge-3-1 { background: var(--tier-3-1); }
+
     .tier-zone { 
       flex: 1; display: flex; flex-direction: row; 
-      align-items: center; gap: 4px; padding: 4px; min-height: 50px; 
+      align-items: center; gap: 4px; padding: 4px; min-height: 40px; 
       overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
       cursor: pointer;
     }
     .tier-zone::-webkit-scrollbar { height: 4px; }
     .tier-zone::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
-
-    .slot-cell {
-      position: relative;
-      width: 48px;
-      height: 48px;
-      background: #2c2c2e;
-      border: 2px dashed #444;
-      border-radius: 6px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .slot-number {
-      position: absolute;
-      bottom: 2px;
-      right: 4px;
-      font-size: 9px;
-      font-weight: bold;
-      color: #8e8e93;
-      pointer-events: none;
-    }
 
     .podium-container {
       display: flex;
@@ -261,9 +247,6 @@
       gap: 6px;
       padding-bottom: 4px;
       width: 100%;
-      min-height: 56px;
-      align-items: center;
-      cursor: pointer;
     }
 
     .unassigned-zone::-webkit-scrollbar { height: 4px; }
@@ -273,7 +256,6 @@
       height: 48px; width: 48px; object-fit: contain; cursor: pointer; border-radius: 6px; flex-shrink: 0;
       transition: transform 0.15s, box-shadow 0.15s, border 0.15s;
       border: 2px solid transparent;
-      z-index: 2;
     }
     .tier-img.selected {
       border: 2px solid var(--accent);
@@ -453,8 +435,10 @@
       { level: 1,  label: '1★',  class: 'badge-10-1' }
     ];
 
-    const tierLevels1 = [
-      { level: 1, label: '', class: '' }
+    const tierLevels3 = [
+      { level: 3, label: '3★', class: 'badge-3-3' },
+      { level: 2, label: '2★', class: 'badge-3-2' },
+      { level: 1, label: '1★', class: 'badge-3-1' }
     ];
 
     const categoryNames = {
@@ -470,7 +454,7 @@
     function getCurrentTierLevels() {
       if (currentMode === 5) return tierLevels5;
       if (currentMode === 10) return tierLevels10;
-      return tierLevels1;
+      return tierLevels3;
     }
 
     function getActiveProducts() {
@@ -551,8 +535,7 @@
           zoneAttrs += ` onclick="handleZoneClick(event, this)"`;
         }
 
-        const badgeHtml = tl.label ? `<div class="tier-badge ${tl.class}">${tl.label}</div>` : '';
-        row.innerHTML = `${badgeHtml}<div ${zoneAttrs}></div>`;
+        row.innerHTML = `<div class="tier-badge ${tl.class}">${tl.label}</div><div ${zoneAttrs}></div>`;
         container.appendChild(row);
       });
     }
@@ -628,10 +611,10 @@
       const list = myData[mode];
       const activeProds = (typeof mode === 'string' && categoryNames[mode]) 
         ? products.filter(p => p.category === mode) 
-        : [];
+        : products;
       const activeIds = activeProds.map(p => p.id);
 
-      const maxTier = mode === 5 ? 5 : (mode === 10 ? 10 : 1);
+      const maxTier = mode === 5 ? 5 : (mode === 10 ? 10 : 3);
       for (let tier = 0; tier <= maxTier; tier++) {
         let pos = 1;
         list.forEach(item => {
@@ -773,13 +756,12 @@
       const unassignedZone = document.querySelector('.unassigned-zone');
       unassignedZone.innerHTML = '';
 
-      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
       const activeProds = getActiveProducts();
       const activeIds = activeProds.map(p => p.id);
       const currentList = myData[currentMode];
       
       const sortedData = [...currentList]
-        .filter(item => !isCategory || activeIds.includes(item.id))
+        .filter(item => activeIds.includes(item.id))
         .sort((a, b) => {
           if (a.t !== b.t) return a.t - b.t;
           return a.p - b.p;
@@ -793,27 +775,9 @@
       getCurrentTierLevels().forEach(tl => {
         const zone = document.querySelector(`#my-board .tier-zone[data-tier="${tl.level}"]`);
         if (zone) {
-          if (isCategory) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
-            });
-          }
-
           sortedData.filter(item => item.t === tl.level).forEach(item => {
-            const slots = zone.querySelectorAll('.slot-cell');
-            const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
             const img = createImgElement(item.id, true);
-            if (emptySlot && img) {
-              emptySlot.appendChild(img);
-            } else if (img) {
-              zone.appendChild(img);
-            }
+            if (img) zone.appendChild(img);
           });
         }
       });
@@ -822,54 +786,28 @@
     function renderFriendView() {
       buildBoard('friend-board', false);
       const name = document.getElementById('friend-select').value;
-      
-      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
-      const activeProds = getActiveProducts();
-      const activeIds = activeProds.map(p => p.id);
-
-      // Ha kategóriát nézünk, azonnal kirajzoljuk az üres slotokat a táblára
-      if (isCategory) {
-        getCurrentTierLevels().forEach(tl => {
-          const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${tl.level}"]`);
-          if (zone) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
-            });
-          }
-        });
-      }
-
       if (!name || !roomData[name]) return;
 
       const userSubmissions = getSubmissionsForMode(roomData[name], currentMode);
       if (!userSubmissions) return;
 
+      const activeProds = getActiveProducts();
+      const activeIds = activeProds.map(p => p.id);
+
       const friendItems = [...userSubmissions]
-        .filter(item => !isCategory || activeIds.includes(item.id))
+        .filter(item => activeIds.includes(item.id))
         .sort((a, b) => {
           if (a.t !== b.t) return a.t - b.t;
           return a.p - b.p;
         });
 
-      getCurrentTierLevels().forEach(tl => {
-        const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${tl.level}"]`);
-        if (zone) {
-          friendItems.filter(item => item.t === tl.level).forEach(item => {
-            const slots = zone.querySelectorAll('.slot-cell');
-            const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
+      friendItems.forEach(item => {
+        if (item.t > 0) {
+          const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
+          if (zone) {
             const img = createImgElement(item.id, false);
-            if (emptySlot && img) {
-              emptySlot.appendChild(img);
-            } else if (img) {
-              zone.appendChild(img);
-            }
-          });
+            if (img) zone.appendChild(img);
+          }
         }
       });
     }
@@ -887,13 +825,9 @@
 
       if (allSubmissions.length === 0) return;
 
-      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
       const activeProds = getActiveProducts();
-      const activeIds = activeProds.map(p => p.id);
       const stats = {};
-      
-      const targetProds = isCategory ? activeProds : products;
-      targetProds.forEach(p => stats[p.id] = { id: p.id, starSum: 0, posSum: 0, count: 0 });
+      activeProds.forEach(p => stats[p.id] = { id: p.id, starSum: 0, posSum: 0, count: 0 });
 
       allSubmissions.forEach(sub => {
         sub.forEach(item => {
@@ -930,7 +864,9 @@
             groupTiers[1].push(i);
           }
         } else {
-          groupTiers[1].push(i);
+          if (i.avgStars >= 2.5) groupTiers[3].push(i);
+          else if (i.avgStars >= 1.5) groupTiers[2].push(i);
+          else groupTiers[1].push(i);
         }
       });
 
@@ -938,27 +874,9 @@
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
         if (zone) {
-          if (isCategory) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
-            });
-          }
-
           groupTiers[tLevel].forEach(item => {
-            const slots = zone.querySelectorAll('.slot-cell');
-            const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
             const img = createImgElement(item.id, false);
-            if (emptySlot && img) {
-              emptySlot.appendChild(img);
-            } else if (img) {
-              zone.appendChild(img);
-            }
+            if (img) zone.appendChild(img);
           });
         }
       });
