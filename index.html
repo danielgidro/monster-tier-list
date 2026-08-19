@@ -68,7 +68,6 @@
       min-width: 100px;
     }
     .mode-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
-    .mode-btn.counter-mode-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
     .dropdown-container {
       position: relative;
@@ -310,64 +309,6 @@
       text-align: center; color: #8e8e93; font-size: 14px; font-weight: bold;
       border: 1px dashed #3a3a3c;
     }
-
-    .counter-container {
-      background: var(--surface); padding: 16px; border-radius: 12px;
-      border: 1px solid #3a3a3c; display: flex; flex-direction: column; gap: 14px; align-items: center;
-    }
-    .counter-display-wrapper {
-      position: relative;
-      width: 180px;
-      height: 180px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .counter-ring-svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 180px;
-      height: 180px;
-      transform: rotate(-90deg);
-    }
-    .counter-ring-bg {
-      fill: none;
-      stroke: #2c2c2e;
-      stroke-width: 8;
-    }
-    .counter-ring-progress {
-      fill: none;
-      stroke: var(--accent);
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-dasharray: 502.65; /* 2 * PI * 80 */
-      stroke-dashoffset: 502.65;
-      transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
-    }
-    .counter-display {
-      width: 156px; height: 156px; border-radius: 50%;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: #161618; box-shadow: inset 0 4px 10px rgba(0,0,0,0.6);
-      z-index: 2;
-    }
-    .counter-value { font-size: 30px; font-weight: 900; color: var(--accent); }
-    .counter-label { font-size: 10px; color: #8e8e93; text-transform: uppercase; }
-    
-    .counter-form { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-    .counter-select, .counter-input {
-      background: #2c2c2e; color: #fff; border: 1px solid #444; padding: 10px;
-      border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; outline: none;
-    }
-    .counter-btn {
-      background: var(--accent); color: #000; border: none; padding: 12px;
-      border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; width: 100%;
-    }
-    .history-list { display: flex; flex-direction: column; gap: 6px; width: 100%; max-height: 200px; overflow-y: auto; }
-    .history-item {
-      background: #2c2c2e; padding: 8px 12px; border-radius: 6px; display: flex;
-      justify-content: space-between; align-items: center; font-size: 12px;
-    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -408,38 +349,12 @@
         <button class="sub-mode-btn" onclick="switchMode('drivers')">Drivers</button>
       </div>
     </div>
-    <button id="mode-counter-btn" class="mode-btn counter-mode-btn" onclick="switchMode('counter')">Meg nem uzemel</button>
   </div>
 
   <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('group', this)">📊 Group Tier</button>
     <button class="tab-btn" onclick="switchTab('my', this)">✏️ My Tier</button>
     <button class="tab-btn" onclick="switchTab('friends', this)">👥 Friends</button>
-  </div>
-
-  <div id="tab-counter" class="tab-content">
-    <div class="counter-container">
-      <div class="counter-display-wrapper">
-        <svg class="counter-ring-svg" viewBox="0 0 180 180">
-          <circle class="counter-ring-bg" cx="90" cy="90" r="80"></circle>
-          <circle id="counter-ring-progress" class="counter-ring-progress" cx="90" cy="90" r="80"></circle>
-        </svg>
-        <div class="counter-display">
-          <div id="caffeine-level" class="counter-value">0 mg</div>
-          <div class="counter-label">Caffeine Level</div>
-        </div>
-      </div>
-      <div class="counter-form">
-        <select id="counter-drink-select" class="counter-select"></select>
-        <input type="datetime-local" id="counter-time-input" class="counter-input">
-        <div style="display: flex; gap: 6px;">
-          <input type="number" id="counter-amount-input" class="counter-input" value="1" min="1" placeholder="Amount" style="width: 80px;">
-          <button class="counter-btn" onclick="logDrink()">Log Drink</button>
-        </div>
-      </div>
-      <div style="font-weight: bold; font-size: 13px; align-self: flex-start; margin-top: 5px; color: #8e8e93;">Total Drunk Count: <span id="total-drink-count" style="color: var(--accent);">0</span></div>
-      <div id="history-list" class="history-list"></div>
-    </div>
   </div>
 
   <div id="tab-group" class="tab-content active">
@@ -484,37 +399,37 @@
     const db = firebase.database();
 
     const products = [
-      { id: '1',  name: 'Aussie Lemonade',         img: 'Aussie Lemonade.png',         category: 'juiced',  caffeine: 160 },
-      { id: '2',  name: 'Bad Apple',               img: 'Bad Apple.png',               category: 'juiced',  caffeine: 160 },
-      { id: '3',  name: 'Energy Zero Sugar',       img: 'Energy Zero Sugar.png',       category: 'energy',  caffeine: 160 },
-      { id: '4',  name: 'Energy',                  img: 'Energy.png',                  category: 'energy',  caffeine: 160 },
-      { id: '5',  name: 'Full Throttle',           img: 'Full Throttle.png',           category: 'drivers', caffeine: 145 },
-      { id: '6',  name: 'Khaotic',                 img: 'Khaotic.png',                 category: 'juiced',  caffeine: 160 },
-      { id: '7',  name: 'Lando Norris',            img: 'Lando Norris.png',            category: 'drivers', caffeine: 160 },
-      { id: '8',  name: 'Mango Loco',              img: 'Mango Loco.png',              category: 'juiced',  caffeine: 152 },
-      { id: '9',  name: 'Monarch',                 img: 'Monarch.png',                 category: 'juiced',  caffeine: 160 },
-      { id: '10', name: 'Nitro Cosmic Peach',      img: 'Nitro Cosmic Peach.png',      category: 'nitro',   caffeine: 160 },
-      { id: '11', name: 'Nitro Super Dry',         img: 'Nitro Super Dry.png',         category: 'nitro',   caffeine: 160 },
-      { id: '12', name: 'Pacific Punch',           img: 'Pacific Punch.png',           category: 'juiced',  caffeine: 152 },
-      { id: '13', name: 'Pipeline Punch',          img: 'Pipeline Punch.png',          category: 'juiced',  caffeine: 152 },
-      { id: '14', name: 'Rehab Lemonade Tea',      img: 'Rehab Lemonade Tea.png',      category: 'rehab',   caffeine: 160 },
-      { id: '15', name: 'Rehab Peach Tea',         img: 'Rehab Peach Tea.png',         category: 'rehab',   caffeine: 160 },
-      { id: '16', name: 'Rio Punch',               img: 'Rio Punch.png',               category: 'juiced',  caffeine: 160 },
-      { id: '17', name: 'Ultra Black',             img: 'Ultra Black.png',             category: 'ultra',   caffeine: 150 },
-      { id: '18', name: 'Ultra Fantasy Ruby Red',  img: 'Ultra Fantasy Ruby Red.png',  category: 'ultra',   caffeine: 150 },
-      { id: '19', name: 'Ultra Fiesta Mango',      img: 'Ultra Fiesta Mango.png',      category: 'ultra',   caffeine: 150 },
-      { id: '20', name: 'Ultra Golden Pineapple',  img: 'Ultra Golden Pineapple.png',  category: 'ultra',   caffeine: 150 },
-      { id: '21', name: 'Ultra Paradise',          img: 'Ultra Paradise.png',          category: 'ultra',   caffeine: 150 },
-      { id: '22', name: 'Ultra Peachy Keen',       img: 'Ultra Peachy Keen.png',       category: 'ultra',   caffeine: 150 },
-      { id: '23', name: 'Ultra Rosa',              img: 'Ultra Rosa.png',              category: 'ultra',   caffeine: 150 },
-      { id: '24', name: 'Ultra Strawberry Dreams', img: 'Ultra Strawberry Dreams.png', category: 'ultra',   caffeine: 150 },
-      { id: '25', name: 'Ultra Vice Guava',        img: 'Ultra Vice Guava.png',        category: 'ultra',   caffeine: 150 },
-      { id: '26', name: 'Ultra Violet',            img: 'Ultra Violet.png',            category: 'ultra',   caffeine: 150 },
-      { id: '27', name: 'Ultra Watermelon',        img: 'Ultra Watermelon.png',        category: 'ultra',   caffeine: 150 },
-      { id: '28', name: 'Ultra Zero',              img: 'Ultra Zero.png',              category: 'ultra',   caffeine: 150 },
-      { id: '29', name: 'Viking Berry',            img: 'Viking Berry.png',            category: 'juiced',  caffeine: 160 },
-      { id: '30', name: 'VR46 Doctor',             img: 'VR46 Doctor.png',             category: 'drivers', caffeine: 160 },
-      { id: '31', name: 'VR46 Zero',               img: 'VR46 Zero.png',               category: 'drivers', caffeine: 160 }
+      { id: '1',  name: 'Aussie Lemonade',         img: 'Aussie Lemonade.png',         category: 'juiced' },
+      { id: '2',  name: 'Bad Apple',               img: 'Bad Apple.png',               category: 'juiced' },
+      { id: '3',  name: 'Energy Zero Sugar',       img: 'Energy Zero Sugar.png',       category: 'energy' },
+      { id: '4',  name: 'Energy',                  img: 'Energy.png',                  category: 'energy' },
+      { id: '5',  name: 'Full Throttle',           img: 'Full Throttle.png',           category: 'drivers' },
+      { id: '6',  name: 'Khaotic',                 img: 'Khaotic.png',                 category: 'juiced' },
+      { id: '7',  name: 'Lando Norris',            img: 'Lando Norris.png',            category: 'drivers' },
+      { id: '8',  name: 'Mango Loco',              img: 'Mango Loco.png',              category: 'juiced' },
+      { id: '9',  name: 'Monarch',                 img: 'Monarch.png',                 category: 'juiced' },
+      { id: '10', name: 'Nitro Cosmic Peach',      img: 'Nitro Cosmic Peach.png',      category: 'nitro' },
+      { id: '11', name: 'Nitro Super Dry',         img: 'Nitro Super Dry.png',         category: 'nitro' },
+      { id: '12', name: 'Pacific Punch',           img: 'Pacific Punch.png',           category: 'juiced' },
+      { id: '13', name: 'Pipeline Punch',          img: 'Pipeline Punch.png',          category: 'juiced' },
+      { id: '14', name: 'Rehab Lemonade Tea',      img: 'Rehab Lemonade Tea.png',      category: 'rehab' },
+      { id: '15', name: 'Rehab Peach Tea',         img: 'Rehab Peach Tea.png',         category: 'rehab' },
+      { id: '16', name: 'Rio Punch',               img: 'Rio Punch.png',               category: 'juiced' },
+      { id: '17', name: 'Ultra Black',             img: 'Ultra Black.png',             category: 'ultra' },
+      { id: '18', name: 'Ultra Fantasy Ruby Red',  img: 'Ultra Fantasy Ruby Red.png',  category: 'ultra' },
+      { id: '19', name: 'Ultra Fiesta Mango',      img: 'Ultra Fiesta Mango.png',      category: 'ultra' },
+      { id: '20', name: 'Ultra Golden Pineapple',  img: 'Ultra Golden Pineapple.png',  category: 'ultra' },
+      { id: '21', name: 'Ultra Paradise',          img: 'Ultra Paradise.png',          category: 'ultra' },
+      { id: '22', name: 'Ultra Peachy Keen',       img: 'Ultra Peachy Keen.png',       category: 'ultra' },
+      { id: '23', name: 'Ultra Rosa',              img: 'Ultra Rosa.png',              category: 'ultra' },
+      { id: '24', name: 'Ultra Strawberry Dreams', img: 'Ultra Strawberry Dreams.png', category: 'ultra' },
+      { id: '25', name: 'Ultra Vice Guava',        img: 'Ultra Vice Guava.png',        category: 'ultra' },
+      { id: '26', name: 'Ultra Violet',            img: 'Ultra Violet.png',            category: 'ultra' },
+      { id: '27', name: 'Ultra Watermelon',        img: 'Ultra Watermelon.png',        category: 'ultra' },
+      { id: '28', name: 'Ultra Zero',              img: 'Ultra Zero.png',              category: 'ultra' },
+      { id: '29', name: 'Viking Berry',            img: 'Viking Berry.png',            category: 'juiced' },
+      { id: '30', name: 'VR46 Doctor',             img: 'VR46 Doctor.png',             category: 'drivers' },
+      { id: '31', name: 'VR46 Zero',               img: 'VR46 Zero.png',               category: 'drivers' }
     ];
 
     let currentMode = 5;
@@ -532,7 +447,6 @@
       drivers: products.map(p => ({ id: p.id, t: 0, p: 0 }))
     };
     let selectedProductId = null; 
-    let caffeineInterval = null;
 
     const tierLevels5 = [
       { level: 5, label: '5★', class: 'badge-5-5' }, 
@@ -607,7 +521,6 @@
       
       document.getElementById('mode-5-btn').classList.toggle('active', mode === 5);
       document.getElementById('mode-10-btn').classList.toggle('active', mode === 10);
-      document.getElementById('mode-counter-btn').classList.toggle('active', mode === 'counter');
       
       const dropdownBtn = document.getElementById('dropdown-main-btn');
       const isSub = typeof mode === 'string' && categoryNames[mode];
@@ -630,20 +543,7 @@
       document.getElementById('dropdown-content').classList.remove('show');
       document.getElementById('dropdown-container').classList.remove('open');
 
-      if (mode === 'counter') {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById('tab-counter').classList.add('active');
-        document.querySelector('.unassigned-section').style.display = 'none';
-        renderCounterView();
-      } else {
-        const activeTabContent = document.querySelector('.tab-content.active').id;
-        if (activeTabContent === 'tab-counter') {
-          const firstTabBtn = document.querySelector('.nav-tabs .tab-btn');
-          switchTab('group', firstTabBtn);
-        } else {
-          renderActiveTab();
-        }
-      }
+      renderActiveTab();
     }
 
     function renderActiveTab() {
@@ -651,7 +551,6 @@
       if (activeTab === 'tab-group') renderGroupView();
       if (activeTab === 'tab-my') renderMyView();
       if (activeTab === 'tab-friends') renderFriendView();
-      if (activeTab === 'tab-counter') renderCounterView();
     }
 
     function buildBoard(containerId, isInteractive = false) {
@@ -836,7 +735,6 @@
       renderActiveTab();
       updateFriendDropdown();
       
-      switchMode(5);
       switchTab('group', document.querySelector('.nav-tabs button:nth-child(1)'));
     }
 
@@ -1143,109 +1041,6 @@
           podium.appendChild(col);
         });
       }
-    }
-
-    function renderCounterView() {
-      const select = document.getElementById('counter-drink-select');
-      if (select.options.length === 0) {
-        products.forEach(p => {
-          const opt = document.createElement('option');
-          opt.value = p.name;
-          opt.innerText = `${p.name} (${p.caffeine} mg)`;
-          select.appendChild(opt);
-        });
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('counter-time-input').value = now.toISOString().slice(0, 16);
-      }
-      
-      calculateCaffeine();
-      if (!caffeineInterval) {
-        caffeineInterval = setInterval(calculateCaffeine, 10000); // Frissítés 10 másodpercenként
-      }
-      updateHistoryList();
-    }
-
-    function logDrink() {
-      const drinkName = document.getElementById('counter-drink-select').value;
-      const timeVal = document.getElementById('counter-time-input').value;
-      const amount = parseInt(document.getElementById('counter-amount-input').value, 10) || 1;
-      if (!timeVal) return;
-
-      const targetTime = new Date(timeVal).getTime();
-      const prod = products.find(p => p.name === drinkName);
-      const caffeinePerItem = prod ? prod.caffeine : 160;
-
-      const history = JSON.parse(localStorage.getItem('monster_caffeine_history') || '[]');
-      history.unshift({ drink: drinkName, time: targetTime, amount, caffeine: caffeinePerItem });
-      localStorage.setItem('monster_caffeine_history', JSON.stringify(history));
-
-      calculateCaffeine();
-      updateHistoryList();
-    }
-
-    function calculateCaffeine() {
-      const history = JSON.parse(localStorage.getItem('monster_caffeine_history') || '[]');
-      const now = new Date().getTime();
-      const halfLifeHours = 5; // A koffein átlagos felezési ideje ~5 óra
-      let currentCaffeine = 0;
-
-      history.forEach(item => {
-        const hoursPassed = (now - item.time) / (1000 * 60 * 60);
-        if (hoursPassed >= 0) {
-          const remaining = (item.caffeine * item.amount) * Math.pow(0.5, hoursPassed / halfLifeHours);
-          currentCaffeine += remaining;
-        }
-      });
-
-      const roundedCaffeine = Math.max(0, Math.round(currentCaffeine));
-      const displayElem = document.getElementById('caffeine-level');
-      if (displayElem) {
-        displayElem.innerText = roundedCaffeine + " mg";
-      }
-
-      // Kör alakú haladási sáv frissítése (400 mg = teljes kör / 100%)
-      const progressRing = document.getElementById('counter-ring-progress');
-      if (progressRing) {
-        const radius = 80;
-        const circumference = 2 * Math.PI * radius; // ~502.65
-        const maxCaffeine = 400;
-        
-        // Kiszámítjuk, hogy hány százaléknál tartunk (max 100% azaz 1.0)
-        let progress = roundedCaffeine / maxCaffeine;
-        if (progress > 1) progress = 1;
-
-        const dashOffset = circumference - (progress * circumference);
-        progressRing.style.strokeDashoffset = dashOffset;
-
-        // Opcionális: Ha túllépi a 400 mg-ot, a szín pirosra (veszélyesre) vált
-        if (roundedCaffeine > 400) {
-          progressRing.style.stroke = 'var(--danger)';
-        } else {
-          progressRing.style.stroke = 'var(--accent)';
-        }
-      }
-    }
-
-    function updateHistoryList() {
-      const historyList = document.getElementById('history-list');
-      const history = JSON.parse(localStorage.getItem('monster_caffeine_history') || '[]');
-      historyList.innerHTML = '';
-      
-      let totalCount = 0;
-      history.forEach(item => {
-        const amt = item.amount || 1;
-        totalCount += amt;
-
-        const div = document.createElement('div');
-        div.className = 'history-item';
-        const dateStr = new Date(item.time).toLocaleString();
-        div.innerHTML = `<span><b>${item.drink}</b> <span style="color: var(--accent);">(x${amt})</span></span><span style="color:#8e8e93;">${dateStr}</span>`;
-        historyList.historyList ? null : null; // biztonsági hivatkozás
-        historyList.appendChild(div);
-      });
-
-      document.getElementById('total-drink-count').innerText = totalCount;
     }
 
     function switchTab(tabId, btn) {
