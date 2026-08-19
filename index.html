@@ -181,6 +181,14 @@
       align-items: center;
       justify-content: center;
     }
+    .slot-cell .tier-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
     .slot-number {
       position: absolute;
       bottom: 2px;
@@ -772,53 +780,54 @@
       const unassignedZone = document.querySelector('.unassigned-zone');
       unassignedZone.innerHTML = '';
 
-      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
-      const activeProds = getActiveProducts();
-      const activeIds = activeProds.map(p => p.id);
+      const activeProds = products;
       const currentList = myData[currentMode];
       
-      const sortedData = [...currentList]
-        .filter(item => !isCategory || activeIds.includes(item.id))
-        .sort((a, b) => {
-          if (a.t !== b.t) return a.t - b.t;
-          return a.p - b.p;
-        });
+      const sortedData = [...currentList].sort((a, b) => {
+        if (a.t !== b.t) return a.t - b.t;
+        return a.p - b.p;
+      });
 
-      if (isCategory) {
-        activeIds.forEach((id, index) => {
-          const slot = document.createElement('div');
-          slot.className = 'slot-cell';
-          const num = document.createElement('span');
-          num.className = 'slot-number';
-          num.innerText = index + 1;
-          slot.appendChild(num);
-          unassignedZone.appendChild(slot);
-        });
-      }
+      activeProds.forEach((prod, index) => {
+        const slot = document.createElement('div');
+        slot.className = 'slot-cell';
+        const num = document.createElement('span');
+        num.className = 'slot-number';
+        num.innerText = index + 1;
+        slot.appendChild(num);
+        unassignedZone.appendChild(slot);
+      });
 
-      sortedData.filter(item => item.t === 0).forEach(item => {
-        const img = createImgElement(item.id, true);
-        if (img) unassignedZone.appendChild(img);
+      const unassignedItems = sortedData.filter(item => item.t === 0);
+      unassignedItems.forEach((item, idx) => {
+        const slotCells = unassignedZone.querySelectorAll('.slot-cell');
+        if (slotCells[idx]) {
+          const img = createImgElement(item.id, true);
+          if (img) slotCells[idx].appendChild(img);
+        }
       });
 
       getCurrentTierLevels().forEach(tl => {
         const zone = document.querySelector(`#my-board .tier-zone[data-tier="${tl.level}"]`);
         if (zone) {
-          if (isCategory) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
-            });
-          }
+          const tierProds = getActiveProducts();
+          tierProds.forEach((prod, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot-cell';
+            const num = document.createElement('span');
+            num.className = 'slot-number';
+            num.innerText = index + 1;
+            slot.appendChild(num);
+            zone.appendChild(slot);
+          });
 
-          sortedData.filter(item => item.t === tl.level).forEach(item => {
-            const img = createImgElement(item.id, true);
-            if (img) zone.appendChild(img);
+          const tierItems = sortedData.filter(item => item.t === tl.level);
+          tierItems.forEach((item, idx) => {
+            const slotCells = zone.querySelectorAll('.slot-cell');
+            if (slotCells[idx]) {
+              const img = createImgElement(item.id, true);
+              if (img) slotCells[idx].appendChild(img);
+            }
           });
         }
       });
@@ -832,12 +841,11 @@
       const userSubmissions = getSubmissionsForMode(roomData[name], currentMode);
       if (!userSubmissions) return;
 
-      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
       const activeProds = getActiveProducts();
       const activeIds = activeProds.map(p => p.id);
 
       const friendItems = [...userSubmissions]
-        .filter(item => !isCategory || activeIds.includes(item.id))
+        .filter(item => activeIds.includes(item.id))
         .sort((a, b) => {
           if (a.t !== b.t) return a.t - b.t;
           return a.p - b.p;
@@ -847,20 +855,24 @@
         if (item.t > 0) {
           const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
           if (zone) {
-            if (isCategory) {
-              activeIds.forEach((id, index) => {
-                const slot = document.createElement('div');
-                slot.className = 'slot-cell';
-                const num = document.createElement('span');
-                num.className = 'slot-number';
-                num.innerText = index + 1;
-                slot.appendChild(num);
-                zone.appendChild(slot);
-              });
-            }
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              slot.appendChild(num);
+              zone.appendChild(slot);
+            });
 
-            const img = createImgElement(item.id, false);
-            if (img) zone.appendChild(img);
+            const tierItems = friendItems.filter(i => i.t === item.t);
+            tierItems.forEach((ti, idx) => {
+              const slotCells = zone.querySelectorAll('.slot-cell');
+              if (slotCells[idx]) {
+                const img = createImgElement(ti.id, false);
+                if (img) slotCells[idx].appendChild(img);
+              }
+            });
           }
         }
       });
@@ -930,21 +942,23 @@
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
         if (zone) {
-          if (isCategory) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
-            });
-          }
+          activeIds.forEach((id, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot-cell';
+            const num = document.createElement('span');
+            num.className = 'slot-number';
+            num.innerText = index + 1;
+            slot.appendChild(num);
+            zone.appendChild(slot);
+          });
 
-          groupTiers[tLevel].forEach(item => {
-            const img = createImgElement(item.id, false);
-            if (img) zone.appendChild(img);
+          const tierItems = groupTiers[tLevel];
+          tierItems.forEach((item, idx) => {
+            const slotCells = zone.querySelectorAll('.slot-cell');
+            if (slotCells[idx]) {
+              const img = createImgElement(item.id, false);
+              if (img) slotCells[idx].appendChild(img);
+            }
           });
         }
       });
