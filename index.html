@@ -822,14 +822,33 @@
     function renderFriendView() {
       buildBoard('friend-board', false);
       const name = document.getElementById('friend-select').value;
+      
+      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
+      const activeProds = getActiveProducts();
+      const activeIds = activeProds.map(p => p.id);
+
+      // Ha kategóriát nézünk, azonnal kirajzoljuk az üres slotokat a táblára
+      if (isCategory) {
+        getCurrentTierLevels().forEach(tl => {
+          const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${tl.level}"]`);
+          if (zone) {
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              slot.appendChild(num);
+              zone.appendChild(slot);
+            });
+          }
+        });
+      }
+
       if (!name || !roomData[name]) return;
 
       const userSubmissions = getSubmissionsForMode(roomData[name], currentMode);
       if (!userSubmissions) return;
-
-      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
-      const activeProds = getActiveProducts();
-      const activeIds = activeProds.map(p => p.id);
 
       const friendItems = [...userSubmissions]
         .filter(item => !isCategory || activeIds.includes(item.id))
@@ -841,18 +860,6 @@
       getCurrentTierLevels().forEach(tl => {
         const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${tl.level}"]`);
         if (zone) {
-          if (isCategory) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
-            });
-          }
-
           friendItems.filter(item => item.t === tl.level).forEach(item => {
             const slots = zone.querySelectorAll('.slot-cell');
             const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
