@@ -23,10 +23,6 @@
       --tier-10-2: #2c2c2e; 
       --tier-10-1: #ffffff;
 
-      --tier-3-3: #ff3b30;
-      --tier-3-2: #ff9500;
-      --tier-3-1: #ffcc00;
-
       --bg-dark: #121212;
       --surface: #1c1c1e; 
       --accent: #30d158;
@@ -73,6 +69,63 @@
     }
     .mode-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
 
+    .dropdown-container {
+      position: relative;
+      flex: 1;
+      min-width: 100px;
+    }
+    .dropdown-btn {
+      width: 100%;
+      background: #222224; color: #8e8e93; border: 1px solid #3a3a3c; padding: 8px;
+      border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; text-align: center;
+      box-sizing: border-box;
+      position: relative;
+      padding-right: 28px;
+    }
+    .dropdown-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
+    .dropdown-btn .arrow {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%) rotate(180deg);
+      transition: transform 0.2s;
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+    }
+    .dropdown-container.open .dropdown-btn .arrow {
+      transform: translateY(-50%) rotate(0deg);
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #1c1c1e;
+      border: 1px solid #3a3a3c;
+      border-radius: 8px;
+      margin-top: 4px;
+      z-index: 100;
+      flex-direction: column;
+      gap: 2px;
+      padding: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .dropdown-content.show { display: flex; }
+    .sub-mode-btn {
+      background: #2c2c2e;
+      color: #8e8e93;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+      text-align: center;
+    }
+    .sub-mode-btn.active { background: #007aff; color: #fff; }
+
     .nav-tabs { display: flex; gap: 6px; margin-bottom: 10px; width: 100%; max-width: 800px; }
     .tab-btn {
       background: #2c2c2e; color: #8e8e93; border: none; padding: 8px 6px;
@@ -106,10 +159,6 @@
     .badge-10-3  { background: var(--tier-10-3); color: #000; }
     .badge-10-2  { background: var(--tier-10-2); color: #fff; }
     .badge-10-1  { background: var(--tier-10-1); color: #000; }
-
-    .badge-3-3 { background: var(--tier-3-3); }
-    .badge-3-2 { background: var(--tier-3-2); }
-    .badge-3-1 { background: var(--tier-3-1); }
 
     .tier-zone { 
       flex: 1; display: flex; flex-direction: row; 
@@ -246,13 +295,18 @@
   <div class="mode-tabs">
     <button id="mode-5-btn" class="mode-btn active" onclick="switchMode(5)">⭐ 5 Star Mod</button>
     <button id="mode-10-btn" class="mode-btn" onclick="switchMode(10)">🌟 10 Star Mod</button>
-    <button class="mode-btn" onclick="switchMode('energy')">Energy</button>
-    <button class="mode-btn" onclick="switchMode('ultra')">Ultra</button>
-    <button class="mode-btn" onclick="switchMode('juiced')">Juiced</button>
-    <button class="mode-btn" onclick="switchMode('rehab')">Rehab</button>
-    <button class="mode-btn" onclick="switchMode('java')">Java</button>
-    <button class="mode-btn" onclick="switchMode('nitro')">Nitro</button>
-    <button class="mode-btn" onclick="switchMode('drivers')">Drivers</button>
+    <div id="dropdown-container" class="dropdown-container">
+      <button id="dropdown-main-btn" class="dropdown-btn" onclick="toggleDropdown(event)">Categories <svg class="arrow" viewBox="0 0 24 24"><path d="M4 16L12 8L20 16" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></button>
+      <div id="dropdown-content" class="dropdown-content">
+        <button class="sub-mode-btn" onclick="switchMode('energy')">Energy</button>
+        <button class="sub-mode-btn" onclick="switchMode('ultra')">Ultra</button>
+        <button class="sub-mode-btn" onclick="switchMode('juiced')">Juiced</button>
+        <button class="sub-mode-btn" onclick="switchMode('rehab')">Rehab</button>
+        <button class="sub-mode-btn" onclick="switchMode('java')">Java</button>
+        <button class="sub-mode-btn" onclick="switchMode('nitro')">Nitro</button>
+        <button class="sub-mode-btn" onclick="switchMode('drivers')">Drivers</button>
+      </div>
+    </div>
   </div>
 
   <div class="nav-tabs">
@@ -373,10 +427,8 @@
       { level: 1,  label: '1★',  class: 'badge-10-1' }
     ];
 
-    const tierLevels3 = [
-      { level: 3, label: '3★', class: 'badge-3-3' },
-      { level: 2, label: '2★', class: 'badge-3-2' },
-      { level: 1, label: '1★', class: 'badge-3-1' }
+    const tierLevels1 = [
+      { level: 1, label: '', class: '' }
     ];
 
     const categoryNames = {
@@ -392,7 +444,7 @@
     function getCurrentTierLevels() {
       if (currentMode === 5) return tierLevels5;
       if (currentMode === 10) return tierLevels10;
-      return tierLevels3;
+      return tierLevels1;
     }
 
     function getActiveProducts() {
@@ -402,6 +454,25 @@
       return products;
     }
 
+    function toggleDropdown(e) {
+      e.stopPropagation();
+      document.getElementById('dropdown-content').classList.toggle('show');
+      document.getElementById('dropdown-container').classList.toggle('open');
+    }
+
+    window.onclick = function(event) {
+      if (!event.target.matches('.dropdown-btn') && !event.target.closest('.dropdown-content') && !event.target.closest('.dropdown-btn *')) {
+        const dropdowns = document.getElementsByClassName("dropdown-content");
+        for (let i = 0; i < dropdowns.length; i++) {
+          const openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+            document.getElementById('dropdown-container').classList.remove('open');
+          }
+        }
+      }
+    }
+
     function switchMode(mode) {
       currentMode = mode;
       selectedProductId = null;
@@ -409,12 +480,26 @@
       document.getElementById('mode-5-btn').classList.toggle('active', mode === 5);
       document.getElementById('mode-10-btn').classList.toggle('active', mode === 10);
       
-      document.querySelectorAll('.mode-btn:not(#mode-5-btn):not(#mode-10-btn)').forEach(btn => {
+      const dropdownBtn = document.getElementById('dropdown-main-btn');
+      const isSub = typeof mode === 'string' && categoryNames[mode];
+      dropdownBtn.classList.toggle('active', isSub);
+      
+      const arrowSvg = '<svg class="arrow" viewBox="0 0 24 24"><path d="M4 16L12 8L20 16" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+      if (isSub) {
+        dropdownBtn.innerHTML = `${categoryNames[mode]} ${arrowSvg}`;
+      } else {
+        dropdownBtn.innerHTML = `Categories ${arrowSvg}`;
+      }
+
+      document.querySelectorAll('.sub-mode-btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.getAttribute('onclick').includes(mode)) {
           btn.classList.add('active');
         }
       });
+
+      document.getElementById('dropdown-content').classList.remove('show');
+      document.getElementById('dropdown-container').classList.remove('open');
 
       renderActiveTab();
     }
@@ -440,7 +525,8 @@
           zoneAttrs += ` onclick="handleZoneClick(event, this)"`;
         }
 
-        row.innerHTML = `<div class="tier-badge ${tl.class}">${tl.label}</div><div ${zoneAttrs}></div>`;
+        const badgeHtml = tl.label ? `<div class="tier-badge ${tl.class}">${tl.label}</div>` : '';
+        row.innerHTML = `${badgeHtml}<div ${zoneAttrs}></div>`;
         container.appendChild(row);
       });
     }
@@ -519,7 +605,7 @@
         : products;
       const activeIds = activeProds.map(p => p.id);
 
-      const maxTier = mode === 5 ? 5 : (mode === 10 ? 10 : 3);
+      const maxTier = mode === 5 ? 5 : (mode === 10 ? 10 : 1);
       for (let tier = 0; tier <= maxTier; tier++) {
         let pos = 1;
         list.forEach(item => {
@@ -769,9 +855,7 @@
             groupTiers[1].push(i);
           }
         } else {
-          if (i.avgStars >= 2.5) groupTiers[3].push(i);
-          else if (i.avgStars >= 1.5) groupTiers[2].push(i);
-          else groupTiers[1].push(i);
+          groupTiers[1].push(i);
         }
       });
 
