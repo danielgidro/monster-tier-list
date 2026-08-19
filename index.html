@@ -137,7 +137,7 @@
     .tab-content.active { display: block; }
 
     .tier-board { display: flex; flex-direction: column; gap: 4px; background: #000; padding: 4px; border-radius: 8px; width: 100%; box-sizing: border-box; }
-    .tier-row { display: flex; background: var(--surface); min-height: 45px; border-radius: 6px; overflow: hidden; }
+    .tier-row { display: flex; background: var(--surface); min-height: 58px; border-radius: 6px; overflow: hidden; align-items: stretch; }
     .tier-badge {
       width: 42px; display: flex; align-items: center; justify-content: center;
       font-weight: 800; font-size: 13px; color: #000; flex-shrink: 0;
@@ -162,12 +162,34 @@
 
     .tier-zone { 
       flex: 1; display: flex; flex-direction: row; 
-      align-items: center; gap: 4px; padding: 4px; min-height: 40px; 
+      align-items: center; gap: 4px; padding: 4px; min-height: 50px; 
       overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
       cursor: pointer;
     }
     .tier-zone::-webkit-scrollbar { height: 4px; }
     .tier-zone::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+
+    .slot-cell {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      background: #2c2c2e;
+      border: 2px dashed #444;
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slot-number {
+      position: absolute;
+      bottom: 2px;
+      right: 4px;
+      font-size: 9px;
+      font-weight: bold;
+      color: #8e8e93;
+      pointer-events: none;
+    }
 
     .podium-container {
       display: flex;
@@ -239,6 +261,8 @@
       gap: 6px;
       padding-bottom: 4px;
       width: 100%;
+      min-height: 56px;
+      align-items: center;
     }
 
     .unassigned-zone::-webkit-scrollbar { height: 4px; }
@@ -248,6 +272,7 @@
       height: 48px; width: 48px; object-fit: contain; cursor: pointer; border-radius: 6px; flex-shrink: 0;
       transition: transform 0.15s, box-shadow 0.15s, border 0.15s;
       border: 2px solid transparent;
+      z-index: 2;
     }
     .tier-img.selected {
       border: 2px solid var(--accent);
@@ -758,6 +783,16 @@
           return a.p - b.p;
         });
 
+      activeIds.forEach((id, index) => {
+        const slot = document.createElement('div');
+        slot.className = 'slot-cell';
+        const num = document.createElement('span');
+        num.className = 'slot-number';
+        num.innerText = index + 1;
+        slot.appendChild(num);
+        unassignedZone.appendChild(slot);
+      });
+
       sortedData.filter(item => item.t === 0).forEach(item => {
         const img = createImgElement(item.id, true);
         if (img) unassignedZone.appendChild(img);
@@ -766,6 +801,16 @@
       getCurrentTierLevels().forEach(tl => {
         const zone = document.querySelector(`#my-board .tier-zone[data-tier="${tl.level}"]`);
         if (zone) {
+          activeIds.forEach((id, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot-cell';
+            const num = document.createElement('span');
+            num.className = 'slot-number';
+            num.innerText = index + 1;
+            slot.appendChild(num);
+            zone.appendChild(slot);
+          });
+
           sortedData.filter(item => item.t === tl.level).forEach(item => {
             const img = createImgElement(item.id, true);
             if (img) zone.appendChild(img);
@@ -796,6 +841,16 @@
         if (item.t > 0) {
           const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
           if (zone) {
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              slot.appendChild(num);
+              zone.appendChild(slot);
+            });
+
             const img = createImgElement(item.id, false);
             if (img) zone.appendChild(img);
           }
@@ -817,6 +872,7 @@
       if (allSubmissions.length === 0) return;
 
       const activeProds = getActiveProducts();
+      const activeIds = activeProds.map(p => p.id);
       const stats = {};
       activeProds.forEach(p => stats[p.id] = { id: p.id, starSum: 0, posSum: 0, count: 0 });
 
@@ -863,6 +919,16 @@
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
         if (zone) {
+          activeIds.forEach((id, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'slot-cell';
+            const num = document.createElement('span');
+            num.className = 'slot-number';
+            num.innerText = index + 1;
+            slot.appendChild(num);
+            zone.appendChild(slot);
+          });
+
           groupTiers[tLevel].forEach(item => {
             const img = createImgElement(item.id, false);
             if (img) zone.appendChild(img);
