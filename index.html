@@ -83,18 +83,16 @@
       background: #222224; color: #8e8e93; border: 1px solid #3a3a3c; padding: 8px;
       border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; text-align: center;
       box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      position: relative;
+      padding-right: 24px;
     }
     .dropdown-btn.active { background: #007aff; color: #fff; border-color: #007aff; }
     .dropdown-btn .arrow {
-      transition: transform 0.2s;
-      font-size: 10px;
-    }
-    .dropdown-container.open .dropdown-btn .arrow {
-      transform: rotate(180deg);
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
     }
     .dropdown-content {
       display: none;
@@ -299,8 +297,8 @@
   <div class="mode-tabs">
     <button id="mode-5-btn" class="mode-btn active" onclick="switchMode(5)">⭐ 5 Star Mod</button>
     <button id="mode-10-btn" class="mode-btn" onclick="switchMode(10)">🌟 10 Star Mod</button>
-    <div id="dropdown-container" class="dropdown-container">
-      <button id="dropdown-main-btn" class="dropdown-btn" onclick="toggleDropdown(event)">Categories <span class="arrow">&#9660;</span></button>
+    <div class="dropdown-container">
+      <button id="dropdown-main-btn" class="dropdown-btn" onclick="toggleDropdown(event)">Categories <span class="arrow">^</span></button>
       <div id="dropdown-content" class="dropdown-content">
         <button class="sub-mode-btn" onclick="switchMode('energy')">Energy</button>
         <button class="sub-mode-btn" onclick="switchMode('ultra')">Ultra</button>
@@ -463,7 +461,6 @@
     function toggleDropdown(e) {
       e.stopPropagation();
       document.getElementById('dropdown-content').classList.toggle('show');
-      document.getElementById('dropdown-container').classList.toggle('open');
     }
 
     window.onclick = function(event) {
@@ -473,7 +470,6 @@
           const openDropdown = dropdowns[i];
           if (openDropdown.classList.contains('show')) {
             openDropdown.classList.remove('show');
-            document.getElementById('dropdown-container').classList.remove('open');
           }
         }
       }
@@ -491,9 +487,9 @@
       dropdownBtn.classList.toggle('active', isSub);
       
       if (isSub) {
-        dropdownBtn.innerHTML = `${categoryNames[mode]} <span class="arrow">&#9660;</span>`;
+        dropdownBtn.innerHTML = `${categoryNames[mode]} <span class="arrow">^</span>`;
       } else {
-        dropdownBtn.innerHTML = `Categories <span class="arrow">&#9660;</span>`;
+        dropdownBtn.innerHTML = `Categories <span class="arrow">^</span>`;
       }
 
       document.querySelectorAll('.sub-mode-btn').forEach(btn => {
@@ -504,7 +500,6 @@
       });
 
       document.getElementById('dropdown-content').classList.remove('show');
-      document.getElementById('dropdown-container').classList.remove('open');
 
       renderActiveTab();
     }
