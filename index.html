@@ -169,6 +169,14 @@
     .tier-zone::-webkit-scrollbar { height: 4px; }
     .tier-zone::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
 
+    .slot-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      gap: 2px;
+    }
+
     .slot-cell {
       position: relative;
       width: 48px;
@@ -181,14 +189,22 @@
       align-items: center;
       justify-content: center;
     }
-    .slot-number {
-      position: absolute;
-      bottom: 2px;
-      right: 4px;
+
+    .slot-cell.has-item {
+      background: transparent;
+      border: 2px solid transparent;
+    }
+
+    .slot-number-box {
+      background: #222224;
+      border: 1px solid #3a3a3c;
+      border-radius: 4px;
+      padding: 1px 4px;
       font-size: 9px;
       font-weight: bold;
       color: #8e8e93;
-      pointer-events: none;
+      text-align: center;
+      min-width: 16px;
     }
 
     .podium-container {
@@ -795,22 +811,30 @@
         if (zone) {
           if (isCategory) {
             activeIds.forEach((id, index) => {
+              const wrapper = document.createElement('div');
+              wrapper.className = 'slot-wrapper';
+
               const slot = document.createElement('div');
               slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
+              
+              const numBox = document.createElement('div');
+              numBox.className = 'slot-number-box';
+              numBox.innerText = index + 1;
+
+              wrapper.appendChild(slot);
+              wrapper.appendChild(numBox);
+              zone.appendChild(wrapper);
             });
           }
 
           sortedData.filter(item => item.t === tl.level).forEach(item => {
-            const slots = zone.querySelectorAll('.slot-cell');
-            const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
+            const wrappers = zone.querySelectorAll('.slot-wrapper');
+            const emptyWrapper = Array.from(wrappers).find(w => !w.querySelector('.tier-img'));
             const img = createImgElement(item.id, true);
-            if (emptySlot && img) {
-              emptySlot.appendChild(img);
+            if (emptyWrapper && img) {
+              const slot = emptyWrapper.querySelector('.slot-cell');
+              slot.classList.add('has-item');
+              slot.appendChild(img);
             } else if (img) {
               zone.appendChild(img);
             }
@@ -827,19 +851,24 @@
       const activeProds = getActiveProducts();
       const activeIds = activeProds.map(p => p.id);
 
-      // Ha kategóriát nézünk, azonnal kirajzoljuk az üres slotokat a táblára
       if (isCategory) {
         getCurrentTierLevels().forEach(tl => {
           const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${tl.level}"]`);
           if (zone) {
             activeIds.forEach((id, index) => {
+              const wrapper = document.createElement('div');
+              wrapper.className = 'slot-wrapper';
+
               const slot = document.createElement('div');
               slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
+
+              const numBox = document.createElement('div');
+              numBox.className = 'slot-number-box';
+              numBox.innerText = index + 1;
+
+              wrapper.appendChild(slot);
+              wrapper.appendChild(numBox);
+              zone.appendChild(wrapper);
             });
           }
         });
@@ -861,11 +890,13 @@
         const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${tl.level}"]`);
         if (zone) {
           friendItems.filter(item => item.t === tl.level).forEach(item => {
-            const slots = zone.querySelectorAll('.slot-cell');
-            const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
+            const wrappers = zone.querySelectorAll('.slot-wrapper');
+            const emptyWrapper = Array.from(wrappers).find(w => !w.querySelector('.tier-img'));
             const img = createImgElement(item.id, false);
-            if (emptySlot && img) {
-              emptySlot.appendChild(img);
+            if (emptyWrapper && img) {
+              const slot = emptyWrapper.querySelector('.slot-cell');
+              slot.classList.add('has-item');
+              slot.appendChild(img);
             } else if (img) {
               zone.appendChild(img);
             }
@@ -940,22 +971,30 @@
         if (zone) {
           if (isCategory) {
             activeIds.forEach((id, index) => {
+              const wrapper = document.createElement('div');
+              wrapper.className = 'slot-wrapper';
+
               const slot = document.createElement('div');
               slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
+
+              const numBox = document.createElement('div');
+              numBox.className = 'slot-number-box';
+              numBox.innerText = index + 1;
+
+              wrapper.appendChild(slot);
+              wrapper.appendChild(numBox);
+              zone.appendChild(wrapper);
             });
           }
 
           groupTiers[tLevel].forEach(item => {
-            const slots = zone.querySelectorAll('.slot-cell');
-            const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
+            const wrappers = zone.querySelectorAll('.slot-wrapper');
+            const emptyWrapper = Array.from(wrappers).find(w => !w.querySelector('.tier-img'));
             const img = createImgElement(item.id, false);
-            if (emptySlot && img) {
-              emptySlot.appendChild(img);
+            if (emptyWrapper && img) {
+              const slot = emptyWrapper.querySelector('.slot-cell');
+              slot.classList.add('has-item');
+              slot.appendChild(img);
             } else if (img) {
               zone.appendChild(img);
             }
