@@ -181,14 +181,6 @@
       align-items: center;
       justify-content: center;
     }
-    .slot-cell .tier-img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
     .slot-number {
       position: absolute;
       bottom: 2px;
@@ -271,6 +263,7 @@
       width: 100%;
       min-height: 56px;
       align-items: center;
+      cursor: pointer;
     }
 
     .unassigned-zone::-webkit-scrollbar { height: 4px; }
@@ -780,53 +773,63 @@
       const unassignedZone = document.querySelector('.unassigned-zone');
       unassignedZone.innerHTML = '';
 
-      const activeProds = products;
+      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
+      const activeProds = getActiveProducts();
+      const activeIds = activeProds.map(p => p.id);
       const currentList = myData[currentMode];
       
-      const sortedData = [...currentList].sort((a, b) => {
-        if (a.t !== b.t) return a.t - b.t;
-        return a.p - b.p;
-      });
+      const sortedData = [...currentList]
+        .filter(item => !isCategory || activeIds.includes(item.id))
+        .sort((a, b) => {
+          if (a.t !== b.t) return a.t - b.t;
+          return a.p - b.p;
+        });
 
-      activeProds.forEach((prod, index) => {
-        const slot = document.createElement('div');
-        slot.className = 'slot-cell';
-        const num = document.createElement('span');
-        num.className = 'slot-number';
-        num.innerText = index + 1;
-        slot.appendChild(num);
-        unassignedZone.appendChild(slot);
-      });
+      if (isCategory) {
+        activeIds.forEach((id, index) => {
+          const slot = document.createElement('div');
+          slot.className = 'slot-cell';
+          const num = document.createElement('span');
+          num.className = 'slot-number';
+          num.innerText = index + 1;
+          slot.appendChild(num);
+          unassignedZone.appendChild(slot);
+        });
+      }
 
-      const unassignedItems = sortedData.filter(item => item.t === 0);
-      unassignedItems.forEach((item, idx) => {
-        const slotCells = unassignedZone.querySelectorAll('.slot-cell');
-        if (slotCells[idx]) {
-          const img = createImgElement(item.id, true);
-          if (img) slotCells[idx].appendChild(img);
+      sortedData.filter(item => item.t === 0).forEach(item => {
+        const unassignedSlots = unassignedZone.querySelectorAll('.slot-cell');
+        const emptySlot = Array.from(unassignedSlots).find(slot => !slot.querySelector('.tier-img'));
+        const img = createImgElement(item.id, true);
+        if (emptySlot && img) {
+          emptySlot.appendChild(img);
+        } else if (img) {
+          unassignedZone.appendChild(img);
         }
       });
 
       getCurrentTierLevels().forEach(tl => {
         const zone = document.querySelector(`#my-board .tier-zone[data-tier="${tl.level}"]`);
         if (zone) {
-          const tierProds = getActiveProducts();
-          tierProds.forEach((prod, index) => {
-            const slot = document.createElement('div');
-            slot.className = 'slot-cell';
-            const num = document.createElement('span');
-            num.className = 'slot-number';
-            num.innerText = index + 1;
-            slot.appendChild(num);
-            zone.appendChild(slot);
-          });
+          if (isCategory) {
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              zone.appendChild(slot);
+            });
+          }
 
-          const tierItems = sortedData.filter(item => item.t === tl.level);
-          tierItems.forEach((item, idx) => {
-            const slotCells = zone.querySelectorAll('.slot-cell');
-            if (slotCells[idx]) {
-              const img = createImgElement(item.id, true);
-              if (img) slotCells[idx].appendChild(img);
+          sortedData.filter(item => item.t === tl.level).forEach(item => {
+            const slots = zone.querySelectorAll('.slot-cell');
+            const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
+            const img = createImgElement(item.id, true);
+            if (emptySlot && img) {
+              emptySlot.appendChild(img);
+            } else if (img) {
+              zone.appendChild(img);
             }
           });
         }
@@ -841,11 +844,12 @@
       const userSubmissions = getSubmissionsForMode(roomData[name], currentMode);
       if (!userSubmissions) return;
 
+      const isCategory = (typeof currentMode === 'string' && categoryNames[currentMode]);
       const activeProds = getActiveProducts();
       const activeIds = activeProds.map(p => p.id);
 
       const friendItems = [...userSubmissions]
-        .filter(item => activeIds.includes(item.id))
+        .filter(item => !isCategory || activeIds.includes(item.id))
         .sort((a, b) => {
           if (a.t !== b.t) return a.t - b.t;
           return a.p - b.p;
@@ -855,24 +859,25 @@
         if (item.t > 0) {
           const zone = document.querySelector(`#friend-board .tier-zone[data-tier="${item.t}"]`);
           if (zone) {
-            activeIds.forEach((id, index) => {
-              const slot = document.createElement('div');
-              slot.className = 'slot-cell';
-              const num = document.createElement('span');
-              num.className = 'slot-number';
-              num.innerText = index + 1;
-              slot.appendChild(num);
-              zone.appendChild(slot);
-            });
+            if (isCategory) {
+              activeIds.forEach((id, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'slot-cell';
+                const num = document.createElement('span');
+                num.className = 'slot-number';
+                num.innerText = index + 1;
+                zone.appendChild(slot);
+              });
+            }
 
-            const tierItems = friendItems.filter(i => i.t === item.t);
-            tierItems.forEach((ti, idx) => {
-              const slotCells = zone.querySelectorAll('.slot-cell');
-              if (slotCells[idx]) {
-                const img = createImgElement(ti.id, false);
-                if (img) slotCells[idx].appendChild(img);
-              }
-            });
+            const slots = zone.querySelectorAll('.slot-cell');
+            const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
+            const img = createImgElement(item.id, false);
+            if (emptySlot && img) {
+              emptySlot.appendChild(img);
+            } else if (img) {
+              zone.appendChild(img);
+            }
           }
         }
       });
@@ -942,22 +947,25 @@
         groupTiers[tLevel].sort((a,b) => (a.posPoints !== b.posPoints) ? a.posPoints - b.posPoints : b.avgStars - a.avgStars);
         const zone = document.querySelector(`#group-board .tier-zone[data-tier="${tLevel}"]`);
         if (zone) {
-          activeIds.forEach((id, index) => {
-            const slot = document.createElement('div');
-            slot.className = 'slot-cell';
-            const num = document.createElement('span');
-            num.className = 'slot-number';
-            num.innerText = index + 1;
-            slot.appendChild(num);
-            zone.appendChild(slot);
-          });
+          if (isCategory) {
+            activeIds.forEach((id, index) => {
+              const slot = document.createElement('div');
+              slot.className = 'slot-cell';
+              const num = document.createElement('span');
+              num.className = 'slot-number';
+              num.innerText = index + 1;
+              zone.appendChild(slot);
+            });
+          }
 
-          const tierItems = groupTiers[tLevel];
-          tierItems.forEach((item, idx) => {
-            const slotCells = zone.querySelectorAll('.slot-cell');
-            if (slotCells[idx]) {
-              const img = createImgElement(item.id, false);
-              if (img) slotCells[idx].appendChild(img);
+          groupTiers[tLevel].forEach(item => {
+            const slots = zone.querySelectorAll('.slot-cell');
+            const emptySlot = Array.from(slots).find(slot => !slot.querySelector('.tier-img'));
+            const img = createImgElement(item.id, false);
+            if (emptySlot && img) {
+              emptySlot.appendChild(img);
+            } else if (img) {
+              zone.appendChild(img);
             }
           });
         }
