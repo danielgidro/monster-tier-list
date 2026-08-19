@@ -112,7 +112,6 @@
       font-weight: bold;
       font-size: 12px;
       text-align: center;
-      text-transform: capitalize;
     }
     .sub-mode-btn.active { background: #007aff; color: #fff; }
 
@@ -292,12 +291,12 @@
     <div class="dropdown-container">
       <button id="dropdown-main-btn" class="dropdown-btn" onclick="toggleDropdown(event)">Categories</button>
       <div id="dropdown-content" class="dropdown-content">
-        <button class="sub-mode-btn" onclick="switchMode('sub1')">energy</button>
-        <button class="sub-mode-btn" onclick="switchMode('sub2')">ultra</button>
-        <button class="sub-mode-btn" onclick="switchMode('sub3')">juiced</button>
-        <button class="sub-mode-btn" onclick="switchMode('sub4')">rehab</button>
-        <button class="sub-mode-btn" onclick="switchMode('sub5')">java</button>
-        <button class="sub-mode-btn" onclick="switchMode('sub6')">nitro</button>
+        <button class="sub-mode-btn" onclick="switchMode('energy')">Energy</button>
+        <button class="sub-mode-btn" onclick="switchMode('ultra')">Ultra</button>
+        <button class="sub-mode-btn" onclick="switchMode('juiced')">Juiced</button>
+        <button class="sub-mode-btn" onclick="switchMode('rehab')">Rehab</button>
+        <button class="sub-mode-btn" onclick="switchMode('java')">Java</button>
+        <button class="sub-mode-btn" onclick="switchMode('nitro')">Nitro</button>
       </div>
     </div>
   </div>
@@ -350,37 +349,37 @@
     const db = firebase.database();
 
     const products = [
-      { id: '1',  name: 'Aussie Lemonade',         img: 'Aussie Lemonade.png',         category: 'sub3' },
-      { id: '2',  name: 'Bad Apple',               img: 'Bad Apple.png',               category: 'sub3' },
-      { id: '3',  name: 'Energy Zero Sugar',       img: 'Energy Zero Sugar.png',       category: 'sub1' },
-      { id: '4',  name: 'Energy',                  img: 'Energy.png',                  category: 'sub1' },
-      { id: '5',  name: 'Full Throttle',           img: 'Full Throttle.png',           category: 'sub1' },
-      { id: '6',  name: 'Khaotic',                 img: 'Khaotic.png',                 category: 'sub3' },
-      { id: '7',  name: 'Lando Norris',            img: 'Lando Norris.png',            category: 'sub1' },
-      { id: '8',  name: 'Mango Loco',              img: 'Mango Loco.png',              category: 'sub3' },
-      { id: '9',  name: 'Monarch',                 img: 'Monarch.png',                 category: 'sub3' },
-      { id: '10', name: 'Nitro Cosmic Peach',      img: 'Nitro Cosmic Peach.png',      category: 'sub6' },
-      { id: '11', name: 'Nitro Super Dry',         img: 'Nitro Super Dry.png',         category: 'sub6' },
-      { id: '12', name: 'Pacific Punch',           img: 'Pacific Punch.png',           category: 'sub3' },
-      { id: '13', name: 'Pipeline Punch',          img: 'Pipeline Punch.png',          category: 'sub3' },
-      { id: '14', name: 'Rehab Lemonade Tea',      img: 'Rehab Lemonade Tea.png',      category: 'sub4' },
-      { id: '15', name: 'Rehab Peach Tea',         img: 'Rehab Peach Tea.png',         category: 'sub4' },
-      { id: '16', name: 'Rio Punch',               img: 'Rio Punch.png',               category: 'sub3' },
-      { id: '17', name: 'Ultra Black',             img: 'Ultra Black.png',             category: 'sub2' },
-      { id: '18', name: 'Ultra Fantasy Ruby Red',  img: 'Ultra Fantasy Ruby Red.png',  category: 'sub2' },
-      { id: '19', name: 'Ultra Fiesta Mango',      img: 'Ultra Fiesta Mango.png',      category: 'sub2' },
-      { id: '20', name: 'Ultra Golden Pineapple',  img: 'Ultra Golden Pineapple.png',  category: 'sub2' },
-      { id: '21', name: 'Ultra Paradise',          img: 'Ultra Paradise.png',          category: 'sub2' },
-      { id: '22', name: 'Ultra Peachy Keen',       img: 'Ultra Peachy Keen.png',       category: 'sub2' },
-      { id: '23', name: 'Ultra Rosa',              img: 'Ultra Rosa.png',              category: 'sub2' },
-      { id: '24', name: 'Ultra Strawberry Dreams', img: 'Ultra Strawberry Dreams.png', category: 'sub2' },
-      { id: '25', name: 'Ultra Vice Guava',        img: 'Ultra Vice Guava.png',        category: 'sub2' },
-      { id: '26', name: 'Ultra Violet',            img: 'Ultra Violet.png',            category: 'sub2' },
-      { id: '27', name: 'Ultra Watermelon',        img: 'Ultra Watermelon.png',        category: 'sub2' },
-      { id: '28', name: 'Ultra Zero',              img: 'Ultra Zero.png',              category: 'sub2' },
-      { id: '29', name: 'Viking Berry',            img: 'Viking Berry.png',            category: 'sub1' },
-      { id: '30', name: 'VR46 Doctor',             img: 'VR46 Doctor.png',             category: 'sub1' },
-      { id: '31', name: 'VR46 Zero',               img: 'VR46 Zero.png',               category: 'sub1' }
+      { id: '1',  name: 'Aussie Lemonade',         img: 'Aussie Lemonade.png',         category: 'juiced' },
+      { id: '2',  name: 'Bad Apple',               img: 'Bad Apple.png',               category: 'juiced' },
+      { id: '3',  name: 'Energy Zero Sugar',       img: 'Energy Zero Sugar.png',       category: 'energy' },
+      { id: '4',  name: 'Energy',                  img: 'Energy.png',                  category: 'energy' },
+      { id: '5',  name: 'Full Throttle',           img: 'Full Throttle.png',           category: 'energy' },
+      { id: '6',  name: 'Khaotic',                 img: 'Khaotic.png',                 category: 'juiced' },
+      { id: '7',  name: 'Lando Norris',            img: 'Lando Norris.png',            category: 'energy' },
+      { id: '8',  name: 'Mango Loco',              img: 'Mango Loco.png',              category: 'juiced' },
+      { id: '9',  name: 'Monarch',                 img: 'Monarch.png',                 category: 'juiced' },
+      { id: '10', name: 'Nitro Cosmic Peach',      img: 'Nitro Cosmic Peach.png',      category: 'nitro' },
+      { id: '11', name: 'Nitro Super Dry',         img: 'Nitro Super Dry.png',         category: 'nitro' },
+      { id: '12', name: 'Pacific Punch',           img: 'Pacific Punch.png',           category: 'juiced' },
+      { id: '13', name: 'Pipeline Punch',          img: 'Pipeline Punch.png',          category: 'juiced' },
+      { id: '14', name: 'Rehab Lemonade Tea',      img: 'Rehab Lemonade Tea.png',      category: 'rehab' },
+      { id: '15', name: 'Rehab Peach Tea',         img: 'Rehab Peach Tea.png',         category: 'rehab' },
+      { id: '16', name: 'Rio Punch',               img: 'Rio Punch.png',               category: 'juiced' },
+      { id: '17', name: 'Ultra Black',             img: 'Ultra Black.png',             category: 'ultra' },
+      { id: '18', name: 'Ultra Fantasy Ruby Red',  img: 'Ultra Fantasy Ruby Red.png',  category: 'ultra' },
+      { id: '19', name: 'Ultra Fiesta Mango',      img: 'Ultra Fiesta Mango.png',      category: 'ultra' },
+      { id: '20', name: 'Ultra Golden Pineapple',  img: 'Ultra Golden Pineapple.png',  category: 'ultra' },
+      { id: '21', name: 'Ultra Paradise',          img: 'Ultra Paradise.png',          category: 'ultra' },
+      { id: '22', name: 'Ultra Peachy Keen',       img: 'Ultra Peachy Keen.png',       category: 'ultra' },
+      { id: '23', name: 'Ultra Rosa',              img: 'Ultra Rosa.png',              category: 'ultra' },
+      { id: '24', name: 'Ultra Strawberry Dreams', img: 'Ultra Strawberry Dreams.png', category: 'ultra' },
+      { id: '25', name: 'Ultra Vice Guava',        img: 'Ultra Vice Guava.png',        category: 'ultra' },
+      { id: '26', name: 'Ultra Violet',            img: 'Ultra Violet.png',            category: 'ultra' },
+      { id: '27', name: 'Ultra Watermelon',        img: 'Ultra Watermelon.png',        category: 'ultra' },
+      { id: '28', name: 'Ultra Zero',              img: 'Ultra Zero.png',              category: 'ultra' },
+      { id: '29', name: 'Viking Berry',            img: 'Viking Berry.png',            category: 'energy' },
+      { id: '30', name: 'VR46 Doctor',             img: 'VR46 Doctor.png',             category: 'energy' },
+      { id: '31', name: 'VR46 Zero',               img: 'VR46 Zero.png',               category: 'energy' }
     ];
 
     let currentMode = 5;
@@ -389,12 +388,12 @@
     let myData = {
       5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
       10: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-      sub1: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-      sub2: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-      sub3: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-      sub4: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-      sub5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-      sub6: products.map(p => ({ id: p.id, t: 0, p: 0 }))
+      energy: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      ultra: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      juiced: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      rehab: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      java: products.map(p => ({ id: p.id, t: 0, p: 0 })),
+      nitro: products.map(p => ({ id: p.id, t: 0, p: 0 }))
     };
     let selectedProductId = null; 
 
@@ -425,6 +424,15 @@
       { level: 1, label: '1★', class: 'badge-3-1' }
     ];
 
+    const categoryNames = {
+      energy: 'Energy',
+      ultra: 'Ultra',
+      juiced: 'Juiced',
+      rehab: 'Rehab',
+      java: 'Java',
+      nitro: 'Nitro'
+    };
+
     function getCurrentTierLevels() {
       if (currentMode === 5) return tierLevels5;
       if (currentMode === 10) return tierLevels10;
@@ -432,7 +440,7 @@
     }
 
     function getActiveProducts() {
-      if (typeof currentMode === 'string' && currentMode.startsWith('sub')) {
+      if (typeof currentMode === 'string' && categoryNames[currentMode]) {
         return products.filter(p => p.category === currentMode);
       }
       return products;
@@ -463,12 +471,11 @@
       document.getElementById('mode-10-btn').classList.toggle('active', mode === 10);
       
       const dropdownBtn = document.getElementById('dropdown-main-btn');
-      const isSub = typeof mode === 'string' && mode.startsWith('sub');
+      const isSub = typeof mode === 'string' && categoryNames[mode];
       dropdownBtn.classList.toggle('active', isSub);
       
       if (isSub) {
-        const activeSubBtn = document.querySelector(`.sub-mode-btn[onclick*="${mode}"]`);
-        dropdownBtn.innerText = `📂 ${activeSubBtn ? activeSubBtn.innerText : mode}`;
+        dropdownBtn.innerText = `📂 ${categoryNames[mode]}`;
       } else {
         dropdownBtn.innerText = `Categories`;
       }
@@ -580,7 +587,7 @@
 
     function updatePositions(mode) {
       const list = myData[mode];
-      const activeProds = (typeof mode === 'string' && mode.startsWith('sub')) 
+      const activeProds = (typeof mode === 'string' && categoryNames[mode]) 
         ? products.filter(p => p.category === mode) 
         : products;
       const activeIds = activeProds.map(p => p.id);
@@ -629,16 +636,17 @@
       currentConnectionRef.on('value', (snapshot) => {
         roomData = snapshot.val() || {};
         
+        const catKeys = Object.keys(categoryNames);
         if (userName && roomData[userName]) {
           const remoteData = roomData[userName];
           if (Array.isArray(remoteData)) {
             myData[5] = remoteData;
           } else if (remoteData) {
-            ['5', '10', 'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6'].forEach(m => {
+            ['5', '10', ...catKeys].forEach(m => {
               if (remoteData[m]) myData[m] = remoteData[m];
             });
           }
-          ['5', '10', 'sub1', 'sub2', 'sub3', 'sub4', 'sub5', 'sub6'].forEach(m => updatePositions(m));
+          ['5', '10', ...catKeys].forEach(m => updatePositions(m));
         }
 
         updateFriendDropdown();
@@ -660,16 +668,14 @@
       
       roomData = {};
       selectedProductId = null;
+      const catKeys = Object.keys(categoryNames);
       myData = {
         5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-        10: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-        sub1: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-        sub2: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-        sub3: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-        sub4: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-        sub5: products.map(p => ({ id: p.id, t: 0, p: 0 })),
-        sub6: products.map(p => ({ id: p.id, t: 0, p: 0 }))
+        10: products.map(p => ({ id: p.id, t: 0, p: 0 }))
       };
+      catKeys.forEach(k => {
+        myData[k] = products.map(p => ({ id: p.id, t: 0, p: 0 }));
+      });
       
       renderActiveTab();
       updateFriendDropdown();
@@ -682,16 +688,15 @@
       const userName = document.getElementById('name-input').value.trim();
       if (!room || !userName) return;
 
-      db.ref(`rooms/${room}/${userName}`).set({
+      const saveData = {
         '5': myData[5],
-        '10': myData[10],
-        'sub1': myData['sub1'],
-        'sub2': myData['sub2'],
-        'sub3': myData['sub3'],
-        'sub4': myData['sub4'],
-        'sub5': myData['sub5'],
-        'sub6': myData['sub6']
+        '10': myData[10]
+      };
+      Object.keys(categoryNames).forEach(k => {
+        saveData[k] = myData[k];
       });
+
+      db.ref(`rooms/${room}/${userName}`).set(saveData);
     }
 
     function getSubmissionsForMode(userObj, mode) {
