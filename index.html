@@ -586,14 +586,14 @@
         const targetIndex = currentList.findIndex(i => i.id === clickedId);
         
         if (sourceIndex !== -1 && targetIndex !== -1) {
-          const sourceItem = currentList[sourceIndex];
-          const targetItem = currentList[targetIndex];
+          // Teljes helycsere (Swap) a két elem között (tier és sorrend is cserélődik)
+          const tempT = currentList[sourceIndex].t;
+          currentList[sourceIndex].t = currentList[targetIndex].t;
+          currentList[targetIndex].t = tempT;
 
-          sourceItem.t = targetItem.t;
-          
-          currentList.splice(sourceIndex, 1);
-          const newTargetIndex = currentList.findIndex(i => i.id === clickedId);
-          currentList.splice(newTargetIndex, 0, sourceItem);
+          const tempObj = currentList[sourceIndex];
+          currentList[sourceIndex] = currentList[targetIndex];
+          currentList[targetIndex] = tempObj;
 
           updatePositions(currentMode);
           saveToFirebase();
