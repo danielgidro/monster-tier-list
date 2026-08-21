@@ -582,9 +582,7 @@
       } else if (selectedProductId === clickedId) {
         selectedProductId = null;
       } else {
-        moveProductBefore(selectedProductId, clickedId);
         selectedProductId = null;
-        saveToFirebase();
       }
       renderMyView();
     }
@@ -620,24 +618,6 @@
       selectedProductId = null;
       saveToFirebase();
       renderMyView();
-    }
-
-    function moveProductBefore(sourceId, targetId) {
-      const currentList = myData[currentMode];
-      const sourceIndex = currentList.findIndex(i => i.id === sourceId);
-      const targetIndex = currentList.findIndex(i => i.id === targetId);
-      if (sourceIndex === -1 || targetIndex === -1) return;
-
-      const sourceItem = currentList[sourceIndex];
-      const targetItem = currentList[targetIndex];
-
-      sourceItem.t = targetItem.t;
-      currentList.splice(sourceIndex, 1);
-
-      const newTargetIndex = currentList.findIndex(i => i.id === targetId);
-      currentList.splice(newTargetIndex, 0, sourceItem);
-
-      updatePositions(currentMode);
     }
 
     function updatePositions(mode) {
