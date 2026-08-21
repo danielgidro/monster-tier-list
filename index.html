@@ -582,7 +582,6 @@
       } else if (selectedProductId === clickedId) {
         selectedProductId = null;
       } else {
-        // Ha már van kiválasztva egy, és egy másikra kattintunk:
         const sourceIndex = currentList.findIndex(i => i.id === selectedProductId);
         const targetIndex = currentList.findIndex(i => i.id === clickedId);
         
@@ -590,14 +589,17 @@
           const sourceItem = currentList[sourceIndex];
           const targetItem = currentList[targetIndex];
 
-          // Ha ugyanabban a tier-ben vannak, felcseréljük a pozíciójukat (sorrendjüket)
+          // Ha ugyanabban a tier-ben vannak, átmozgatjuk a célelem elé/mögé és átrendezzük a tömböt
           if (sourceItem.t === targetItem.t) {
-            const tempPos = sourceItem.p;
-            sourceItem.p = targetItem.p;
-            targetItem.p = tempPos;
+            currentList.splice(sourceIndex, 1);
+            const newTargetIndex = currentList.findIndex(i => i.id === clickedId);
+            currentList.splice(newTargetIndex, 0, sourceItem);
           } else {
-            // Ha különböző tier-ben vannak, a forrás átkerül a cél tier-jébe
+            // Különböző tier esetén átkerül az új tierbe
             sourceItem.t = targetItem.t;
+            currentList.splice(sourceIndex, 1);
+            const newTargetIndex = currentList.findIndex(i => i.id === clickedId);
+            currentList.splice(newTargetIndex, 0, sourceItem);
           }
 
           updatePositions(currentMode);
