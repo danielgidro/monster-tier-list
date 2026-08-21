@@ -582,9 +582,28 @@
       } else if (selectedProductId === clickedId) {
         selectedProductId = null;
       } else {
-        moveProductBefore(selectedProductId, clickedId);
+        // Ha már van kiválasztva egy, és egy másikra kattintunk:
+        const sourceIndex = currentList.findIndex(i => i.id === selectedProductId);
+        const targetIndex = currentList.findIndex(i => i.id === clickedId);
+        
+        if (sourceIndex !== -1 && targetIndex !== -1) {
+          const sourceItem = currentList[sourceIndex];
+          const targetItem = currentList[targetIndex];
+
+          // Ha ugyanabban a tier-ben vannak, felcseréljük a pozíciójukat (sorrendjüket)
+          if (sourceItem.t === targetItem.t) {
+            const tempPos = sourceItem.p;
+            sourceItem.p = targetItem.p;
+            targetItem.p = tempPos;
+          } else {
+            // Ha különböző tier-ben vannak, a forrás átkerül a cél tier-jébe
+            sourceItem.t = targetItem.t;
+          }
+
+          updatePositions(currentMode);
+          saveToFirebase();
+        }
         selectedProductId = null;
-        saveToFirebase();
       }
       renderMyView();
     }
@@ -622,25 +641,6 @@
       renderMyView();
     }
 
-    function moveProductBefore(sourceId, targetId) {
-      const currentList = myData[currentMode];
-      const sourceIndex = currentList.findIndex(i => i.id === sourceId);
-      const targetIndex = currentList.findIndex(i => i.id === targetId);
-      if (sourceIndex === -1 || targetIndex === -1) return;
-
-      const sourceItem = currentList[sourceIndex];
-      const targetItem = currentList[targetIndex];
-
-      if (sourceItem.t !== targetItem.t) return;
-
-      currentList.splice(sourceIndex, 1);
-
-      const newTargetIndex = currentList.findIndex(i => i.id === targetId);
-      currentList.splice(newTargetIndex, 0, sourceItem);
-
-      updatePositions(currentMode);
-    }
-
     function updatePositions(mode) {
       const list = myData[mode];
       const activeProds = (typeof mode === 'string' && categoryNames[mode]) 
@@ -652,7 +652,7 @@
       for (let tier = 0; tier <= maxTier; tier++) {
         let pos = 1;
         list.forEach(item => {
-          if (activeIds.includes(item.id) && item.t === tier) {
+          if ((activeIds.length === 0 || activeIds.includes(item.id)) && item.t === tier) {
             item.p = tier === 0 ? 0 : pos++;
           }
         });
